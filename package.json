@@ -10,6 +10,7 @@
     "dev:client": "cd client && npm run dev",
     "dev:server": "cd server && npm run dev",
     "prepare": "husky",
-    "test": "prettier --write ."
+    "test": "prettier --write .",
+    "test:client": "cd client && npm test"
   }
 }
