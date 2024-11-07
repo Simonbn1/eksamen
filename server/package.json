@@ -3,11 +3,7 @@
     "cookie-parser": "^1.4.7",
     "express": "^4.21.1"
   },
-  "devDependencies": {
-  },
-  "scripts": {
-
-  },
+  "devDependencies": {},
+  "scripts": {},
   "type": "module"
 }
-
