@@ -17,9 +17,9 @@ const Organizer: React.FC = () => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <h1>Create Event</h1>
+      <h1>Lag et arrangement</h1>
       <div>
-        <label>Title</label>
+        <label>Navn</label>
         <input
           type="text"
           value={title}
@@ -28,7 +28,7 @@ const Organizer: React.FC = () => {
         />
       </div>
       <div>
-        <label>Description</label>
+        <label>Beskrivelse</label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
@@ -36,7 +36,7 @@ const Organizer: React.FC = () => {
         />
       </div>
       <div>
-        <label>Date</label>
+        <label>Dato</label>
         <input
           type="date"
           value={date}
@@ -44,7 +44,7 @@ const Organizer: React.FC = () => {
           required
         />
       </div>
-      <button type="submit">Create Event</button>
+      <button type="submit">Bekreft</button>
     </form>
   );
 };
