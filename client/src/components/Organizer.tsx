@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-// @ts-ignore
+import React, { useState } from "react"
 import axios from "axios";
 
 const Organizer: React.FC = () => {
