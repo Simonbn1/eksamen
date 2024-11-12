@@ -7,7 +7,8 @@
     "vite": "^5.4.10"
   },
   "scripts": {
-    "dev": "vite",
+    "build": "cd client && npm run build",
+    "dev": "concurrently npm:dev:server npm:dev:client",
     "dev:client": "cd client && npm run dev",
     "dev:server": "cd server && npm run dev",
     "prepare": "husky",
