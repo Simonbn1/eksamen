@@ -2,8 +2,6 @@ import React, { useEffect, useState } from "react";
 
 interface Event {
   title: string;
-  date: string;
-  description: string;
 }
 
 const EventList: React.FC = () => {
@@ -12,9 +10,9 @@ const EventList: React.FC = () => {
   useEffect(() => {
     async function fetchEvents() {
       try {
-        const response = await fetch("/api/event");
+        const response = await fetch("http://localhost:3000/api/event");
         if (!response.ok) {
-          throw new Error("Network response was not ok");
+          throw new Error(`HTTP error! Status: ${response.status}`);
         }
         const data = await response.json();
         setEvents(data);
@@ -22,6 +20,7 @@ const EventList: React.FC = () => {
         console.error("Failed to fetch events:", error);
       }
     }
+
     fetchEvents();
   }, []);
 
@@ -32,8 +31,6 @@ const EventList: React.FC = () => {
         {events.map((event, index) => (
           <li key={index}>
             <h2>{event.title}</h2>
-            <p>{event.date}</p>
-            <p>{event.description}</p>
           </li>
         ))}
       </ul>

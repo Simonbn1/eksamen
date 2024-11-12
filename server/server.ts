@@ -1,16 +1,15 @@
 import express from "express";
 import { MongoClient } from "mongodb";
-import bodyParser from "body-parser";
-import { eventRouter } from "./eventRouter";
 import dotenv from "dotenv";
-import { WebSocketServer } from "ws";
+import cors from "cors";
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(bodyParser.json());
+app.use(cors());
+app.use(express.json());
 
 const client = new MongoClient(
   process.env.MONGODB_URI ||
@@ -20,35 +19,37 @@ const client = new MongoClient(
 client
   .connect()
   .then(() => {
+    console.log("Connected to MongoDB");
+
     const db = client.db("eventdb");
-    app.use("/api/event", eventRouter(db));
+    const eventsCollection = db.collection("eventdb");
 
-    const server = app.listen(port, () => {
-      console.log(`Server is running on port ${port}`);
-    });
-
-    const wss = new WebSocketServer({ server });
-
-    wss.on("connection", (ws) => {
-      console.log("Client connected");
+    app.get("/api/event", async (req, res) => {
+      try {
+        const events = await eventsCollection.find().toArray(); // Get all events
+        res.json(events);
+      } catch (error) {
+        console.error("Error fetching events:", error);
+        res.status(500).json({ message: "Internal server error" });
+      }
     });
 
     app.post("/api/event", async (req, res) => {
-      const { title, date, description, category, place } = req.body;
-      const newEvent = { title, date, description, category, place };
+      const newEvent = req.body;
       try {
-        await db.collection("eventdb").insertOne(newEvent);
-        wss.clients.forEach((client) => {
-          if (client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify(newEvent));
-          }
-        });
-        res.sendStatus(201);
+        const result = await eventsCollection.insertOne(newEvent);
+        newEvent._id = result.insertedId;
+        res.status(201).json(newEvent);
       } catch (error) {
-        res.status(400).send(error);
+        console.error("Error saving event:", error);
+        res.status(400).json({ message: "Error saving event" });
       }
+    });
+
+    app.listen(port, () => {
+      console.log(`Server is running on http://localhost:${port}`);
     });
   })
   .catch((err) => {
-    console.error(err);
+    console.error("Failed to connect to MongoDB:", err);
   });
