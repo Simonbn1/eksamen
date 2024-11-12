@@ -12,7 +12,7 @@ const Home: React.FC = () => {
         <button onClick={() => navigate("/EventList")}>Anonymous</button>{" "}
       </div>
       <div>
-        <button onClick={() => alert("Registered Sign-In")}>Registered</button>
+        <button onClick={() => navigate("/Registered")}>Registered</button>
       </div>
       <div>
         <button onClick={() => navigate("/Organizer")}>Organizer</button>

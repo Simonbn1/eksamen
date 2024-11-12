@@ -1,13 +1,22 @@
 {
+  "scripts": {
+    "dev": "ts-node-dev server.ts"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.7",
+    "@types/dotenv": "^8.2.0",
+    "@types/express": "^4.17.21",
+    "@types/ws": "^8.5.13",
+    "ts-node": "10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.6.2"
+  },
   "dependencies": {
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.4.5",
-    "express": "^4.21.1",
+    "express": "^4.21.0",
     "mongodb": "^6.10.0",
-    "mongoose": "^8.8.0"
-  },
-  "scripts": {
-    "start": "node server.ts"
-  },
-  "type": "module"
+    "nodemon": "^3.1.7",
+    "ws": "^8.18.0"
+  }
 }
