@@ -114,27 +114,47 @@ client
       }
     });
 
-    async function joinEvent(userId: string, eventId: string) {
+    app.put("/api/event/:eventId", async (req, res) => {
+      const { eventId } = req.params;
+      const updatedEvent = req.body;
+
       try {
-        const usersCollection = db.collection("users");
-        const eventsCollection = db.collection("eventdb");
-
-        // Add the eventId to the user's list of joined events
-        await usersCollection.updateOne(
-          { _id: new ObjectId(userId) },
-          { $addToSet: { joinedEvents: new ObjectId(eventId) } },
-        );
-
-        // Add the userId to the event's list of participants
-        await eventsCollection.updateOne(
+        const result = await eventsCollection.updateOne(
           { _id: new ObjectId(eventId) },
-          { $addToSet: { participants: new ObjectId(userId) } },
+          { $set: updatedEvent },
         );
+
+        if (result.modifiedCount === 0) {
+          return res
+            .status(404)
+            .json({ message: "Event not found or no changes made" });
+        }
+
+        res.status(200).json({ message: "Event updated successfully" });
       } catch (error) {
-        console.error("Error in joinEvent function:", error);
-        throw error; // Re-throw the error to be caught by the route handler
+        console.error("Error updating event:", error);
+        res.status(500).json({ message: "Internal server error" });
       }
-    }
+    });
+
+    app.delete("/api/event/:eventId", async (req, res) => {
+      const { eventId } = req.params;
+
+      try {
+        const result = await eventsCollection.deleteOne({
+          _id: new ObjectId(eventId),
+        });
+
+        if (result.deletedCount === 0) {
+          return res.status(404).json({ message: "Event not found" });
+        }
+
+        res.status(200).json({ message: "Event deleted successfully" });
+      } catch (error) {
+        console.error("Error deleting event:", error);
+        res.status(500).json({ message: "Internal server error" });
+      }
+    });
 
     app.listen(port, () => {
       console.log(`Server is running on http://localhost:${port}`);

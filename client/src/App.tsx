@@ -5,9 +5,10 @@ import Home from "./components/Home";
 import EventList from "./components/EventList";
 import Organizer from "./components/Organizer";
 import Registered from "./components/Registered";
-import "./styles.css";
 import Profile from "./components/Profile";
+import EditEvent from "./components/EditEvent";
 import { JoinedEventsProvider } from "./components/JoinedEventsContext";
+import "./styles.css";
 
 const root = createRoot(document.getElementById("root")!);
 
@@ -30,7 +31,7 @@ const App: React.FC = () => {
     <JoinedEventsProvider>
       <Router>
         <div className="grid-container">
-          <header className="header">Gym Website</header>
+          <header className="header">Website</header>
           <nav className="nav">
             <ul>
               <li>
@@ -51,15 +52,13 @@ const App: React.FC = () => {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="EventList" element={<EventList />} />
-              <Route
-                path="Organizer"
-                element={<Organizer onNewEvent={handleNewEvent} />}
-              />
+              <Route path="Organizer" element={<Organizer />} />
               <Route path="Registered" element={<Registered />} />
               <Route path="Profile" element={<Profile />} />
+              <Route path="EditEvent/:eventId" element={<EditEvent />} />
             </Routes>
           </main>
-          <footer className="footer">© 2023 Gym Website</footer>
+          <footer className="footer">© Website</footer>
         </div>
       </Router>
     </JoinedEventsProvider>
