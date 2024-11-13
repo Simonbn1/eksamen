@@ -25,8 +25,20 @@ client
     const eventsCollection = db.collection("eventdb");
 
     app.get("/api/event", async (req, res) => {
+      const { category, place, startTime, endTime, search } = req.query;
+      const query: any = {};
+
+      if (category) query.category = category;
+      if (place) query.place = place;
+      if (startTime || endTime) {
+        query.date = {};
+        if (startTime) query.date.$gte = new Date(startTime as string);
+        if (endTime) query.date.$lte = new Date(endTime as string);
+      }
+      if (search) query.title = { $regex: search, $options: "i" };
+
       try {
-        const events = await eventsCollection.find().toArray();
+        const events = await eventsCollection.find(query).toArray();
         res.json(events);
       } catch (error) {
         console.error("Error fetching events:", error);
