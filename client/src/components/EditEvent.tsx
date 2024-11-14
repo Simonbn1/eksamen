@@ -11,7 +11,7 @@ interface Event {
 }
 
 const EditEvent: React.FC = () => {
-  const { eventId } = useParams<{ eventId: string }>();
+  const { eventName } = useParams<{ eventName: string }>();
   const [event, setEvent] = useState<Event | null>(null);
   const navigate = useNavigate();
 
@@ -19,7 +19,7 @@ const EditEvent: React.FC = () => {
     async function fetchEvent() {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/event/${eventId}`,
+          `http://localhost:3000/api/event/${eventName}`,
         );
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
@@ -32,7 +32,7 @@ const EditEvent: React.FC = () => {
     }
 
     fetchEvent();
-  }, [eventId]);
+  }, [eventName]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -49,7 +49,7 @@ const EditEvent: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:3000/api/event/${eventId}`,
+        `http://localhost:3000/api/event/${eventName}`,
         {
           method: "PUT",
           headers: {

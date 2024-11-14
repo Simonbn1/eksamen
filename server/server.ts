@@ -48,7 +48,18 @@ client
 
     app.post("/api/event", async (req, res) => {
       const newEvent = req.body;
+
       try {
+        // Check if an event with the same title already exists
+        const existingEvent = await eventsCollection.findOne({
+          title: newEvent.title,
+        });
+        if (existingEvent) {
+          return res
+            .status(400)
+            .json({ message: "Event with the same title already exists" });
+        }
+
         const result = await eventsCollection.insertOne(newEvent);
         newEvent._id = result.insertedId;
         res.status(201).json(newEvent);
@@ -114,13 +125,13 @@ client
       }
     });
 
-    app.put("/api/event/:eventId", async (req, res) => {
-      const { eventId } = req.params;
+    app.put("/api/event/name/:eventName", async (req, res) => {
+      const { eventName } = req.params;
       const updatedEvent = req.body;
 
       try {
         const result = await eventsCollection.updateOne(
-          { _id: new ObjectId(eventId) },
+          { title: eventName },
           { $set: updatedEvent },
         );
 
@@ -137,13 +148,15 @@ client
       }
     });
 
-    app.delete("/api/event/:eventId", async (req, res) => {
-      const { eventId } = req.params;
+    app.delete("/api/event/name/:eventName", async (req, res) => {
+      const { eventName } = req.params;
+      console.log("Attempting to delete event with name:", eventName);
 
       try {
         const result = await eventsCollection.deleteOne({
-          _id: new ObjectId(eventId),
+          title: eventName,
         });
+        console.log("Delete result:", result);
 
         if (result.deletedCount === 0) {
           return res.status(404).json({ message: "Event not found" });

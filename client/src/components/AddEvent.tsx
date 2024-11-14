@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 
 interface Event {
-  id: string;
   title: string;
   date: string;
   description: string;
@@ -9,21 +8,39 @@ interface Event {
   place: string;
 }
 
-interface Props {
-  onNewEvent: (event: Event) => void;
-}
+const AddEvent: React.FC = () => {
+  const [newEvent, setNewEvent] = useState<Event>({
+    title: "",
+    date: "",
+    description: "",
+    category: "",
+    place: "",
+  });
+  const [error, setError] = useState<string | null>(null);
 
-const AddEvent: React.FC<Props> = ({ onNewEvent }) => {
-  const [title, setTitle] = useState("");
-  const [date, setDate] = useState("");
-  const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("");
-  const [place, setPlace] = useState("");
+  function handleInputChange(
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) {
+    const { name, value } = e.target;
+    setNewEvent((prevEvent) => ({
+      ...prevEvent,
+      [name]: value,
+    }));
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const { title, date, category, place } = newEvent;
 
-    const newEvent = { title, date, description, category, place };
+    if (!title || !date || !category || !place) {
+      setError("All fields are required.");
+      alert("All fields are required.");
+      return;
+    }
+
+    setError(null);
 
     try {
       const response = await fetch("http://localhost:3000/api/event", {
@@ -35,70 +52,93 @@ const AddEvent: React.FC<Props> = ({ onNewEvent }) => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to save the event");
+        const data = await response.json();
+        if (
+          response.status === 400 &&
+          data.message === "Event with the same title already exists"
+        ) {
+          alert("Event with the same title already exists");
+        } else {
+          alert("Error submitting event");
+        }
+        return;
       }
 
-      const savedEvent = await response.json();
-      onNewEvent(savedEvent);
-      setTitle("");
-      setDate("");
-      setDescription("");
-      setCategory("");
-      setPlace("");
+      console.log("Event submitted:", newEvent);
+      // Reset the form fields
+      setNewEvent({
+        title: "",
+        date: "",
+        description: "",
+        category: "",
+        place: "",
+      });
     } catch (error) {
-      console.error("Error saving event:", error);
+      console.error("Error submitting event:", error);
+      alert("Error submitting event");
     }
   }
 
   return (
     <div>
       <h1>Add Event</h1>
-      <form className={"event"} onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}>
         <div>
           <label>Title:</label>
           <input
             type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            name="title"
+            value={newEvent.title}
+            onChange={handleInputChange}
           />
         </div>
         <div>
           <label>Date:</label>
           <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
+            type="datetime-local"
+            name="date"
+            value={newEvent.date}
+            onChange={handleInputChange}
           />
         </div>
         <div>
           <label>Description:</label>
           <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            name="description"
+            value={newEvent.description}
+            onChange={handleInputChange}
           />
         </div>
         <div>
           <label>Category:</label>
           <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
+            name="category"
+            value={newEvent.category}
+            onChange={handleInputChange}
           >
-            <option value="">Select Category</option>
-            <option value="Category1">Category1</option>
-            <option value="Category2">Category2</option>
-            <option value="Category3">Category3</option>
+            <option value="">Select a category</option>
+            <option value="Music">Music</option>
+            <option value="Sports">Sports</option>
+            <option value="Education">Education</option>
+            <option value="Health">Health</option>
           </select>
         </div>
         <div>
           <label>Place:</label>
-          <select value={place} onChange={(e) => setPlace(e.target.value)}>
-            <option value="">Select Place</option>
-            <option value="Place1">Place1</option>
-            <option value="Place2">Place2</option>
-            <option value="Place3">Place3</option>
+          <select
+            name="place"
+            value={newEvent.place}
+            onChange={handleInputChange}
+          >
+            <option value="">Select a place</option>
+            <option value="Auditorium">Auditorium</option>
+            <option value="Conference Room">Conference Room</option>
+            <option value="Outdoor">Outdoor</option>
+            <option value="Online">Online</option>
           </select>
         </div>
-        <button type="submit">Add Event</button>
+        <button type="submit">Submit Event</button>
+        {error && <p style={{ color: "red" }}>{error}</p>}
       </form>
     </div>
   );
