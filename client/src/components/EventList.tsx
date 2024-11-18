@@ -1,11 +1,18 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "./style/EventList.css";
 
 interface Event {
   title: string;
+  location: string;
+  category: string;
+  description: string;
+  date: string;
 }
 
 const EventList: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchEvents() {
@@ -27,15 +34,31 @@ const EventList: React.FC = () => {
   return (
     <div>
       <h1>Event List</h1>
-      <ul>
+      <div className="event-grid">
         {events.map((event, index) => (
-          <li key={index}>
-            <h2>{event.title}</h2>
-          </li>
+          <div key={index} className="event-card">
+            <h2 className="event-title">{event.title}</h2>
+            <div className="event-detail">
+              <strong>Category:</strong> {event.category}
+            </div>
+            <div className="event-detail">
+              <strong>Location:</strong> {event.location}
+            </div>
+            <div className="event-detail">
+              <strong>Date:</strong> {event.date}
+            </div>
+            <div className="event-detail">
+              <strong>Description:</strong> {event.description}
+            </div>
+          </div>
         ))}
-      </ul>
+      </div>
+      <div className="back">
+        <button className="Event-back-button" onClick={() => navigate("/")}>
+          Back to Home
+        </button>
+      </div>
     </div>
   );
 };
-
 export default EventList;

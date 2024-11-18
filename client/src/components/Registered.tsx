@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useJoinedEvents } from "./JoinedEventsContext";
+import "./style/Registered.css"; // Assuming the CSS file is named "Registered.css"
 
 interface Event {
   id: string;
@@ -84,16 +85,31 @@ const Registered: React.FC = () => {
   };
 
   return (
-    <div className="registered-container">
-      <nav className="nav">
-        <ul>
-          <li>
+    <div className="grid-container">
+      {/* Header Section */}
+      <div className="item1">
+        <h1>
+          Welcome to <span className="event">Event</span>
+          <span className="logger">Logger</span>
+        </h1>
+      </div>
+
+      {/* Menu Section */}
+      <div className="item2">
+        <nav className="menu-buttons">
+          <button>
             <Link to="/Profile">View Profile</Link>
-          </li>
-        </ul>
-      </nav>
-      <div className="content">
-        <h1>Registered Events</h1>
+          </button>
+          <button>
+            <Link to="/">Back to Home</Link>
+          </button>
+        </nav>
+      </div>
+
+      {/* Main Content Section */}
+      <div className="item3">
+        <h2>Registered Events</h2>
+        {/* Filters */}
         <div>
           <input
             type="text"
@@ -131,10 +147,12 @@ const Registered: React.FC = () => {
             onChange={handleInputChange}
           />
         </div>
-        <ul>
+
+        {/* Event List */}
+        <ul className="event-list">
           {events.map((event) => (
-            <li key={event.id}>
-              <h2>{event.title}</h2>
+            <li key={event.id} className="event-card">
+              <h3>{event.title}</h3>
               <p>{event.date}</p>
               <p>{event.description}</p>
               <p>{event.category}</p>

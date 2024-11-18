@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import "./style/Profile.css"; // Profile-specific CSS
 
 interface Event {
   id: string;
@@ -25,7 +27,6 @@ const Profile: React.FC = () => {
         }
 
         const data = await response.json();
-        console.log("Fetched events:", data); // Debugging line
         setEvents(data);
       } catch (error) {
         console.error("Failed to fetch registered events:", error);
@@ -36,23 +37,37 @@ const Profile: React.FC = () => {
   }, []);
 
   return (
-    <div>
-      <h1>My Registered Events</h1>
-      {events.length === 0 ? (
-        <p>No events joined yet.</p> // Conditional message for empty data
-      ) : (
-        <ul>
-          {events.map((event) => (
-            <li key={event.id}>
-              <h2>{event.title}</h2>
-              <p>{event.date}</p>
-              <p>{event.description}</p>
-              <p>{event.category}</p>
-              <p>{event.place}</p>
-            </li>
-          ))}
-        </ul>
-      )}
+    <div className="profile-container">
+      {/* Header Section */}
+      <div className="profile-header">
+        <h1>My Registered Events</h1>
+      </div>
+
+      {/* Navigation Button */}
+      <div className="profile-navigation">
+        <button className="back-button">
+          <Link to="/Registered">Back to Registered</Link>
+        </button>
+      </div>
+
+      {/* Main Content Section */}
+      <div className="profile-main">
+        {events.length === 0 ? (
+          <p>No events joined yet.</p>
+        ) : (
+          <ul className="profile-event-list">
+            {events.map((event) => (
+              <li key={event.id} className="profile-event-card">
+                <h2>{event.title}</h2>
+                <p>{event.date}</p>
+                <p>{event.description}</p>
+                <p>{event.category}</p>
+                <p>{event.place}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 };

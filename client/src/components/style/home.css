@@ -1,0 +1,116 @@
+.Home-grid-container {
+  display: grid;
+  grid-template-areas:
+    "header header header header header header"
+    "menu image image image image image";
+  gap: 10px;
+  grid-template-rows: auto 1fr;
+  background-color: #f9f9f9;
+  padding: 20px;
+  height: 100vh;
+}
+
+.item1 {
+  grid-area: header;
+}
+.item2 {
+  grid-area: menu;
+}
+.image {
+  grid-area: image;
+}
+
+.item1 {
+  grid-area: header;
+  text-align: center;
+  padding: 30px;
+}
+
+.item1 h1 {
+  font-size: 3em;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.event {
+  color: #e63946; /* Fin rød farge */
+  font-weight: bold;
+  font-family: "Arial Black", sans-serif;
+}
+
+.logger {
+  color: #000; /* Svart farge */
+  font-family: "Courier New", Courier, monospace; /* Litt annerledes stil */
+  font-weight: normal;
+}
+
+.grid-item {
+  background-color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  padding: 20px 0;
+  font-size: 20px;
+}
+
+.menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center; /* Sentrerer knappene horisontalt */
+}
+
+.menu-buttons button {
+  width: auto; /* Juster til ønsket bredde, eller bruk en fast bredde hvis ønsket */
+  padding: 8px 16px; /* Juster padding for ønsket størrelse */
+  background-color: #4d2427; /* Sett ønsket farge */
+  color: white; /* Endrer tekstfargen for kontrast */
+  border: none; /* Fjern kantlinjen hvis du vil */
+  border-radius: 4px; /* Gir avrundede hjørner */
+  cursor: pointer;
+}
+.menu-buttons button:hover {
+  background-color: #961515; /* Litt mørkere farge ved hover */
+}
+
+.image {
+  grid-area: image;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.image img {
+  max-width: 100%;
+  height: 100%;
+  border-radius: 10px; /* Gir bildet avrundede hjørner */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Lett skygge rundt bildet */
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.5); /* Mørk, transparent bakgrunn */
+  padding: 20px;
+}
+
+.overlay h1 {
+  font-size: 2.5em;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.overlay p {
+  font-size: 1.2em;
+}

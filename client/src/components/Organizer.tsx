@@ -1,27 +1,40 @@
 import React, { useState } from "react";
 import AddEvent from "./AddEvent";
 import YourEvents from "./YourEvents";
+import "./style/Organizer.css";
 
 const Organizer: React.FC = () => {
   const [selectedSection, setSelectedSection] = useState<"add" | "view">("add");
 
   return (
-    <div>
-      <h1>Organizer</h1>
-      <nav>
-        <ul>
-          <li>
-            <button onClick={() => setSelectedSection("add")}>Add Event</button>
-          </li>
-          <li>
-            <button onClick={() => setSelectedSection("view")}>
-              Your Events
-            </button>
-          </li>
-        </ul>
+    <div className="organizer-container">
+      <h1 className="organizer-title">Organizer</h1>
+      <nav className="button-group">
+        <button
+          className={`submit-button ${selectedSection === "add" ? "active" : ""}`}
+          onClick={() => setSelectedSection("add")}
+        >
+          Add Event
+        </button>
+        <button
+          className={`back-button ${selectedSection === "view" ? "active" : ""}`}
+          onClick={() => setSelectedSection("view")}
+        >
+          Your Events
+        </button>
       </nav>
-      {selectedSection === "add" && <AddEvent onNewEvent={() => {}} />}
-      {selectedSection === "view" && <YourEvents />}
+      <div className="event-form">
+        {selectedSection === "add" && (
+          <div className="form-group title-group">
+            <AddEvent />
+          </div>
+        )}
+        {selectedSection === "view" && (
+          <div className="form-group description-group">
+            <YourEvents />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

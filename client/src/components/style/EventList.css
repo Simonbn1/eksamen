@@ -1,0 +1,75 @@
+.event-page {
+  display: grid;
+  grid-template-areas:
+    "header"
+    "content"
+    "back";
+  grid-template-rows: auto 1fr auto; /* Auto tilpasser størrelsen på rader */
+  gap: 20px;
+  padding: 20px;
+  height: 100vh; /* Full høyde på skjermen */
+}
+
+h1 {
+  text-align: center; /* Sentrerer overskriften horisontalt */
+  font-size: 2.5em;
+  font-weight: bold;
+  margin: 20px 0;
+}
+
+.event-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.event-card {
+  background: linear-gradient(50deg, #f6f6f8, #b2b3b6);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 8px 8px rgba(0, 0, 0, 0.1); /* Skygge for å skille kortene */
+  border: 1px solid #8a8888; /* Lett kantlinje rundt boksen */
+  display: grid;
+  grid-template-rows: auto;
+  row-gap: 10px;
+  transition: transform 0.2s ease; /* Legger til en liten hover-effekt */
+}
+
+.event-card:hover {
+  transform: scale(1.02); /* Øker størrelsen litt ved hover */
+}
+
+.event-title {
+  font-size: 1.5em;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.event-detail {
+  font-size: 1em;
+  color: #555;
+}
+
+.back {
+  grid-area: back;
+  display: flex;
+  justify-content: flex-start; /* Plasserer knappen til venstre */
+  align-items: center; /* Vertikal sentrering hvis nødvendig */
+  padding: 10px;
+}
+
+.Event-back-button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  font-size: 1em;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.Event-back-button:hover {
+  background-color: #0056b3;
+}
