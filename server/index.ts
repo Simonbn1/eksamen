@@ -147,12 +147,10 @@ app.get("/api/login/google/callback", async (req: CustomRequest, res) => {
       }
     } catch (error) {
       console.error("Error fetching the token:", error);
-      return res
-        .status(500)
-        .json({
-          status: "error",
-          error: "Failed to exchange authorization code for tokens",
-        });
+      return res.status(500).json({
+        status: "error",
+        error: "Failed to exchange authorization code for tokens",
+      });
     }
   }
 
