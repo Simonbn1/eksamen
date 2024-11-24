@@ -175,11 +175,9 @@ client
         console.error(
           `Error fetching user events: userId=${userId}, error=${error}`,
         );
-        res
-          .status(500)
-          .json({
-            message: "Failed to fetch user events. Please try again later.",
-          });
+        res.status(500).json({
+          message: "Failed to fetch user events. Please try again later.",
+        });
       }
     });
 
