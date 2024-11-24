@@ -1,28 +1,33 @@
-.organizer-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-  background-color: #f9f9f9;
-}
+/*.grid-container {*/
+/*  display: grid;*/
+/*  grid-template-areas:*/
+/*        "header header"*/
+/*        "button-group form-group";*/
+/*  grid-template-columns: 1fr 2fr;*/
+/*  grid-template-rows: auto 1fr;*/
+/*  gap: 20px;*/
+/*  height: 100vh;*/
+/*  padding: 20px;*/
+/*  background-color: #f4f4f4;*/
+/*}*/
 
-.organizer-title {
-  font-size: 2.5em;
-  margin-bottom: 20px;
-  color: #333;
-}
+/*.organizer-title {*/
+/*  font-size: 2.5em;*/
+/*  margin-bottom: 20px;*/
+/*  color: #333;*/
+/*}*/
 
-.event-form {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 20px;
-  background-color: #ffffff;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  max-width: 600px;
-  width: 100%;
-}
+/*.event-form {*/
+/*  display: grid;*/
+/*  grid-template-columns: 1fr 2fr;*/
+/*  gap: 20px;*/
+/*  background-color: #ffffff;*/
+/*  padding: 20px;*/
+/*  border-radius: 10px;*/
+/*  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);*/
+/*  max-width: 600px;*/
+/*  width: 100%;*/
+/*}*/
 
 .form-group {
   display: flex;
@@ -43,15 +48,17 @@ select {
   font-size: 1em;
 }
 
-textarea {
-  resize: none;
-  height: 100px;
-}
+/*textarea {*/
+/*  resize: none;*/
+/*  height: 100px;*/
+/*}*/
 
 .button-group {
-  grid-column: span 2; /* Plasserer knappene i hele bredden */
+  gap: 15px;
+  grid-column: span 2;
   display: flex;
-  justify-content: space-between; /* Plasserer knappene på hver sin side */
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .submit-button,
@@ -62,7 +69,7 @@ textarea {
   border-radius: 5px;
   cursor: pointer;
   text-align: center;
-  width: 48%; /* Gjør knappene like brede */
+  width: 48%;
 }
 
 .submit-button {
@@ -74,17 +81,57 @@ textarea {
   background-color: #0056b3;
 }
 
-.back-button {
+.org-back-home-button {
   background-color: #6c757d;
   color: white;
+  padding: 10px 20px;
+  font-size: 1em;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
+  width: 48%;
 }
 
-.back-button:hover {
+.org-back-home-button:hover {
   background-color: #5a6268;
 }
 
-/* Gjør Title og Description bredere */
 .title-group,
 .description-group {
   grid-column: span 2;
+}
+
+.organizer-container {
+  display: grid;
+  grid-template-areas:
+    "sidebar title"
+    "sidebar form";
+  grid-template-columns: 1fr 2fr;
+  gap: 20px;
+  padding: 20px;
+  background-color: #f9f9f9;
+}
+
+.organizer-title {
+  grid-area: title;
+  font-size: 2.5em;
+  color: #333;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.event-form {
+  grid-area: form;
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  width: 100%;
+}
+
+textarea {
+  resize: none;
+  height: 150px;
 }

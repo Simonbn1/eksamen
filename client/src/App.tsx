@@ -9,6 +9,7 @@ import Profile from "./components/Profile";
 import EditEvent from "./components/EditEvent";
 import LoginCallback from "./components/LoginCallback";
 import { JoinedEventsProvider } from "./components/JoinedEventsContext";
+import EventDetails from "./components/EventDetails";
 
 const root = createRoot(document.getElementById("root")!);
 
@@ -24,6 +25,7 @@ const App: React.FC = () => {
             <Route path="Registered" element={<Registered />} />
             <Route path="Profile" element={<Profile />} />
             <Route path="EditEvent/:eventId" element={<EditEvent />} />
+            <Route path="event/:eventTitle" element={<EventDetails />} />
             <Route
               path="/login/:provider/callback"
               element={<LoginCallback />}

@@ -4,7 +4,7 @@ import "./style/EventList.css";
 
 interface Event {
   title: string;
-  location: string;
+  place: string;
   category: string;
   description: string;
   date: string;
@@ -42,7 +42,7 @@ const EventList: React.FC = () => {
               <strong>Category:</strong> {event.category}
             </div>
             <div className="event-detail">
-              <strong>Location:</strong> {event.location}
+              <strong>Location:</strong> {event.place}
             </div>
             <div className="event-detail">
               <strong>Date:</strong> {event.date}
@@ -55,7 +55,7 @@ const EventList: React.FC = () => {
       </div>
       <div className="back">
         <button className="Event-back-button" onClick={() => navigate("/")}>
-          Back to Home
+          Back
         </button>
       </div>
     </div>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useJoinedEvents } from "./JoinedEventsContext";
-import "./style/Registered.css"; // Assuming the CSS file is named "Registered.css"
+import "./style/Registered.css";
 
 interface Event {
   id: string;
@@ -12,28 +12,62 @@ interface Event {
   place?: string;
 }
 
+function LoginButton({
+  provider,
+  children,
+}: {
+  provider: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <a href={`/api/login/${provider}/start`} className="button-link">
+      {children}
+    </a>
+  );
+}
+
 const Registered: React.FC = () => {
+  const [user, setUser] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
   const [events, setEvents] = useState<Event[]>([]);
-  const [filters, setFilters] = useState({
-    category: "",
-    place: "",
-    startTime: "",
-    endTime: "",
-    search: "",
-  });
+  const navigate = useNavigate();
   const { addJoinedEvent } = useJoinedEvents();
 
   useEffect(() => {
-    async function fetchEvents() {
-      const query = new URLSearchParams(filters as any).toString();
+    async function loadUser() {
       try {
-        const response = await fetch(
-          `http://localhost:3000/api/event?${query}`,
-        );
+        const res = await fetch("/api/userinfo");
+        if (res.ok) {
+          const userData = await res.json();
+          console.log("Loaded user data:", userData);
+
+          if (userData.id) {
+            localStorage.setItem("userId", userData.id);
+          } else {
+            console.error("No id found in userData:", userData);
+          }
+
+          setUser(userData);
+        } else {
+          setError(`Error: ${res.status} ${res.statusText}`);
+        }
+      } catch (err) {
+        setError("Network error. Please try again.");
+      }
+    }
+
+    loadUser();
+  }, []);
+
+  useEffect(() => {
+    async function fetchEvents() {
+      try {
+        const response = await fetch(`/api/event`);
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
         const data = await response.json();
+        console.log("Fetched events:", data);
         const mappedEvents = data.map((event: any) => ({
           id: event._id,
           title: event.title,
@@ -47,122 +81,134 @@ const Registered: React.FC = () => {
         console.error("Failed to fetch events:", error);
       }
     }
-
     fetchEvents();
-  }, [filters]);
+  }, []);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
-    const { name, value } = e.target;
-    setFilters((prevFilters) => ({ ...prevFilters, [name]: value }));
-  };
-
-  const handleJoinEvent = async (eventId: string) => {
+  const handleJoinEvent = async (eventTitle: string) => {
     try {
-      const userId = "6734bd3a7ccc910302792384"; // Replace with actual logged-in user ID
-      const response = await fetch(
-        `http://localhost:3000/api/join/${eventId}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ userId }),
-        },
+      if (!user || !user.id) {
+        console.error("Invalid or missing userId:", user);
+        throw new Error("Invalid or missing userId");
+      }
+
+      const event = events.find((event) => event.title === eventTitle);
+      if (!event) {
+        console.error("Event not found:", eventTitle);
+        throw new Error("Event not found");
+      }
+
+      console.log(
+        "Joining event with userId:",
+        user.id,
+        "and eventId:",
+        event.id,
       );
+
+      const response = await fetch(`/api/join/${event.title}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId: user.id }),
+      });
+
       if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        const errorMessage = await response.json();
+        throw new Error(
+          errorMessage.message || `HTTP error! Status: ${response.status}`,
+        );
       }
-      const joinedEvent = events.find((event) => event.id === eventId);
-      if (joinedEvent) {
-        addJoinedEvent(joinedEvent);
-      }
-      alert("Successfully joined the event!");
+
+      addJoinedEvent(event);
+      alert(`You have successfully joined the event: ${event.title}!`);
     } catch (error) {
       console.error("Failed to join event:", error);
     }
   };
 
+  const handleViewDetails = (eventTitle: string) => {
+    navigate(`/event/${eventTitle}`);
+  };
+
+  if (!user) {
+    return (
+      <div className="grid-container">
+        <div className="header">
+          <h1>
+            Welcome to <span className="event">Event</span>
+            <span className="logger">Logger</span>
+          </h1>
+        </div>
+        <div className="login-links">
+          <LoginButton provider="google">Log in with Google</LoginButton>
+          <LoginButton provider="linkedin">Log in with LinkedIn</LoginButton>
+          <LoginButton provider="entraid">Log in with EntraID</LoginButton>
+          <button onClick={() => navigate("/")} className="back-home-button">
+            Back
+          </button>
+        </div>
+        <div className="login-text">
+          <h2>Log in to see your registered events</h2>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div>{error}</div>;
+  }
+
   return (
-    <div className="grid-container">
-      {/* Header Section */}
-      <div className="item1">
+    <div className="user-grid-container">
+      <div className="header">
         <h1>
           Welcome to <span className="event">Event</span>
           <span className="logger">Logger</span>
         </h1>
       </div>
-
-      {/* Menu Section */}
-      <div className="item2">
-        <nav className="menu-buttons">
-          <button>
-            <Link to="/Profile">View Profile</Link>
-          </button>
-          <button>
-            <Link to="/">Back to Home</Link>
-          </button>
-        </nav>
+      <div className="sidebar">
+        <h2>Welcome {user.name}</h2>
+        <p>User details:</p>
+        <div>Email: {user.email}</div>
+        <img src={user.picture} alt="User" />
+        <button
+          onClick={() => {
+            fetch("/api/login/end_session").then(() => {
+              setUser(null);
+              navigate("/");
+            });
+          }}
+          className="back-home-button"
+        >
+          Log out
+        </button>
       </div>
-
-      {/* Main Content Section */}
-      <div className="item3">
-        <h2>Registered Events</h2>
-        {/* Filters */}
-        <div>
-          <input
-            type="text"
-            name="search"
-            placeholder="Search by name"
-            value={filters.search}
-            onChange={handleInputChange}
-          />
-          <select
-            name="category"
-            value={filters.category}
-            onChange={handleInputChange}
-          >
-            <option value="">All Categories</option>
-            <option value="Category1">Category1</option>
-            <option value="Category2">Category2</option>
-          </select>
-          <input
-            type="text"
-            name="place"
-            placeholder="Place"
-            value={filters.place}
-            onChange={handleInputChange}
-          />
-          <input
-            type="datetime-local"
-            name="startTime"
-            value={filters.startTime}
-            onChange={handleInputChange}
-          />
-          <input
-            type="datetime-local"
-            name="endTime"
-            value={filters.endTime}
-            onChange={handleInputChange}
-          />
-        </div>
-
-        {/* Event List */}
-        <ul className="event-list">
-          {events.map((event) => (
-            <li key={event.id} className="event-card">
-              <h3>{event.title}</h3>
-              <p>{event.date}</p>
-              <p>{event.description}</p>
-              <p>{event.category}</p>
-              <p>{event.place}</p>
-              <button onClick={() => handleJoinEvent(event.id)}>
-                Join Event
-              </button>
-            </li>
-          ))}
-        </ul>
+      <div className="content">
+        <h2>Available Events</h2>
+        {events.length === 0 ? (
+          <p>No events available at the moment.</p>
+        ) : (
+          <ul className="event-list">
+            {events.map((event) => (
+              <li key={event.id} className="event-card">
+                <h3>{event.title}</h3>
+                <p>{event.date}</p>
+                <p>{event.description}</p>
+                <p>{event.category}</p>
+                <p>{event.place}</p>
+                <button onClick={() => handleJoinEvent(event.title)}>
+                  Join Event
+                </button>
+                <button onClick={() => handleViewDetails(event.title)}>
+                  View Details
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <button className="profile-button" onClick={() => navigate("/Profile")}>
+          View My Profile
+        </button>
       </div>
     </div>
   );

@@ -14,5 +14,8 @@
     "prepare": "husky",
     "test": "prettier --write .",
     "test:client": "cd client && npm test"
+  },
+  "dependencies": {
+    "@react-oauth/google": "^0.12.1"
   }
 }

@@ -60,16 +60,16 @@ h1 {
 }
 
 .Event-back-button {
-  background-color: #007bff;
-  color: white;
-  padding: 10px 20px;
-  font-size: 1em;
+  display: block;
+  padding: 10px 15px;
   border: none;
+  background-color: #6c757d;
+  color: white;
   border-radius: 5px;
   cursor: pointer;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
 }
 
 .Event-back-button:hover {
-  background-color: #0056b3;
+  background-color: #5a6268;
 }

@@ -55,24 +55,25 @@
   font-size: 20px;
 }
 
-.menu-buttons {
+.Home-menu-buttons {
   display: flex;
   flex-direction: column;
   gap: 10px;
   align-items: center; /* Sentrerer knappene horisontalt */
 }
 
-.menu-buttons button {
-  width: auto; /* Juster til ønsket bredde, eller bruk en fast bredde hvis ønsket */
-  padding: 8px 16px; /* Juster padding for ønsket størrelse */
-  background-color: #4d2427; /* Sett ønsket farge */
-  color: white; /* Endrer tekstfargen for kontrast */
-  border: none; /* Fjern kantlinjen hvis du vil */
-  border-radius: 4px; /* Gir avrundede hjørner */
+.Home-menu-buttons button {
+  padding: 10px;
+  font-size: 1em;
+  border: none;
+  border-radius: 5px;
   cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-.menu-buttons button:hover {
-  background-color: #961515; /* Litt mørkere farge ved hover */
+.Home-menu-buttons button:hover {
+  background-color: #0056b3;
 }
 
 .image {
@@ -101,7 +102,7 @@
   align-items: center;
   color: white;
   text-align: center;
-  background-color: rgba(0, 0, 0, 0.5); /* Mørk, transparent bakgrunn */
+  background-color: rgba(0, 0, 0, 0.5);
   padding: 20px;
 }
 
@@ -113,4 +114,36 @@
 
 .overlay p {
   font-size: 1.2em;
+}
+
+.Admin-login {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  max-width: 300px;
+}
+
+.Admin-login h2 {
+  margin-bottom: 1rem;
+}
+
+.Admin-login input {
+  display: block;
+  margin-bottom: 0.5rem;
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 1rem;
+}
+
+.Admin-login button {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.error {
+  color: red;
+  margin-top: 0.5rem;
 }

@@ -4,35 +4,34 @@ import { useNavigate } from "react-router-dom";
 const LoginCallback: React.FC = () => {
   const navigate = useNavigate();
   const responseValues = Object.fromEntries(
-    new URLSearchParams(window.location.search).entries(),
+    new URLSearchParams(window.location.hash.substring(1)).entries(),
   );
-  const { code } = responseValues; // Extract the authorization code
+  const { access_token } = responseValues;
   const discovery_endpoint =
     "https://accounts.google.com/.well-known/openid-configuration";
 
   async function establishSession() {
-    const res = await fetch(`/api/login/google/callback?code=${code}`, {
-      method: "GET",
-      credentials: "include", // Include cookies for session handling
+    const res = await fetch("/api/login", {
+      method: "POST",
+      body: JSON.stringify({ access_token, discovery_endpoint }),
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
     if (res.ok) {
-      navigate("/");
-    } else {
-      navigate("/");
+      navigate("/Registered");
     }
   }
 
   useEffect(() => {
-    if (code) {
-      establishSession();
-    }
-  }, [code]);
+    establishSession();
+  }, [access_token]);
 
   return (
-    <div>
-      <div>Please wait while we complete the login process...</div>
-      <pre>{code}</pre>
-    </div>
+    <>
+      <div>Logging you in, please wait...</div>
+      <pre>{access_token}</pre>
+    </>
   );
 };
 

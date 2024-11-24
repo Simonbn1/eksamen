@@ -83,6 +83,7 @@ const EditEvent: React.FC = () => {
             onChange={handleInputChange}
           />
         </div>
+
         <div>
           <label>Date:</label>
           <input
@@ -92,14 +93,7 @@ const EditEvent: React.FC = () => {
             onChange={handleInputChange}
           />
         </div>
-        <div>
-          <label>Description:</label>
-          <textarea
-            name="description"
-            value={event.description}
-            onChange={handleInputChange}
-          />
-        </div>
+
         <div>
           <label>Category:</label>
           <input

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import "./style/Profile.css"; // Profile-specific CSS
+import "./style/Profile.css";
 
 interface Event {
   id: string;
@@ -16,12 +16,19 @@ const Profile: React.FC = () => {
 
   useEffect(() => {
     async function fetchRegisteredEvents() {
+      const userId = localStorage.getItem("userId");
+
+      if (!userId) {
+        console.error("No userId found in localStorage");
+        return;
+      }
+
+      console.log("Fetching registered events for userId:", userId); // Debug log
+
       try {
-        const userId = "6734bd3a7ccc910302792384"; // Replace with actual user ID
         const response = await fetch(
           `http://localhost:3000/api/user/events/${userId}`,
         );
-
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
