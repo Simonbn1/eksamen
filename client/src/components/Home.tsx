@@ -43,8 +43,12 @@ const Home: React.FC = () => {
 
       <nav className="menu">
         <div className="Home-menu-buttons">
-          <button onClick={() => navigate("/EventList")}>Aktive arrangementer</button>
-          <button onClick={() => navigate("/Registered")}>Bruker logg inn</button>
+          <button onClick={() => navigate("/EventList")}>
+            Aktive arrangementer
+          </button>
+          <button onClick={() => navigate("/Registered")}>
+            Bruker logg inn
+          </button>
           <button onClick={() => setShowLogin((prev) => !prev)}>Admin</button>
         </div>
       </nav>

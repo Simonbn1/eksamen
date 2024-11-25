@@ -74,7 +74,9 @@ body {
   font-size: 1em;
   cursor: pointer;
   border-radius: 5px;
-  transition: background-color 0.3s, transform 0.2s;
+  transition:
+    background-color 0.3s,
+    transform 0.2s;
 }
 
 .sidebar .logout-button {
@@ -84,7 +86,9 @@ body {
 .sidebar .profile-button {
   margin-top: 10px;
   background-color: #555;
-  transition: background-color 0.3s, transform 0.2s;
+  transition:
+    background-color 0.3s,
+    transform 0.2s;
 }
 
 .sidebar .profile-button:hover {
@@ -149,7 +153,9 @@ body {
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   padding: 15px;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
   min-width: 250px; /* Ensure minimum width */
 }
 
@@ -178,7 +184,9 @@ body {
   border-radius: 5px;
   font-size: 1em;
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s;
+  transition:
+    background-color 0.3s,
+    transform 0.2s;
 }
 
 .event-card button:hover {

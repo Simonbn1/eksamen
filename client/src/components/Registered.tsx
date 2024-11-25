@@ -193,11 +193,8 @@ const Registered: React.FC = () => {
         >
           Logg ut
         </button>
-        <button
-          className="profile-button"
-            onClick={() => navigate("/Profile")}
-        >
-            Min side
+        <button className="profile-button" onClick={() => navigate("/Profile")}>
+          Min side
         </button>
       </aside>
       <main className="content">
@@ -242,9 +239,9 @@ const Registered: React.FC = () => {
                 <p>{event.category}</p>
                 <p>{event.place}</p>
                 <div>
-                <button onClick={() => handleJoinEvent(event.title)}>
-                  Meld deg på
-                </button>
+                  <button onClick={() => handleJoinEvent(event.title)}>
+                    Meld deg på
+                  </button>
                 </div>
                 <button onClick={() => handleViewDetails(event.title)}>
                   Detaljer
