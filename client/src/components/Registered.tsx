@@ -149,12 +149,13 @@ const Registered: React.FC = () => {
       <div className="grid-container">
         <header className="header">
           <h1>
-            Velkommen til <span className="event">Bruker</span>
-            <span className="logger">Side</span>
+            <span className="event">Gym</span>
+            <span className="logger">Hub</span>
           </h1>
+          <p>Din ultimate treningsdestinasjon</p>
         </header>
         <div className="login-links">
-          <LoginButton provider="google">Logg inn med Google</LoginButton>
+        <LoginButton provider="google">Logg inn med Google</LoginButton>
           <LoginButton provider="linkedin">Logg inn med LinkedIn</LoginButton>
           <LoginButton provider="entraid">Logg inn med EntraID</LoginButton>
           <button onClick={() => navigate("/")} className="back-home-button">
@@ -174,12 +175,13 @@ const Registered: React.FC = () => {
     <div className="user-grid-container">
       <header className="header">
         <h1>
-          Welcome to <span className="event">Event</span>
-          <span className="logger">Logger</span>
+          <span className="event">Gym</span>
+          <span className="logger">Hub</span>
         </h1>
+        <p>Din ultimate treningsdestinasjon</p>
       </header>
       <aside className="sidebar">
-        <h2>Velkommen {user.name}</h2>
+      <h2>Velkommen {user.name}</h2>
         <div>Email: {user.email}</div>
         <img src={user.picture} alt="User" />
         <button
