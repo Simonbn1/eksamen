@@ -155,7 +155,7 @@ const Registered: React.FC = () => {
           <p>Din ultimate treningsdestinasjon</p>
         </header>
         <div className="login-links">
-        <LoginButton provider="google">Logg inn med Google</LoginButton>
+          <LoginButton provider="google">Logg inn med Google</LoginButton>
           <LoginButton provider="linkedin">Logg inn med LinkedIn</LoginButton>
           <LoginButton provider="entraid">Logg inn med EntraID</LoginButton>
           <button onClick={() => navigate("/")} className="back-home-button">
@@ -181,7 +181,7 @@ const Registered: React.FC = () => {
         <p>Din ultimate treningsdestinasjon</p>
       </header>
       <aside className="sidebar">
-      <h2>Velkommen {user.name}</h2>
+        <h2>Velkommen {user.name}</h2>
         <div>Email: {user.email}</div>
         <img src={user.picture} alt="User" />
         <button
