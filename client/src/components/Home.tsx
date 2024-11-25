@@ -43,40 +43,40 @@ const Home: React.FC = () => {
 
       <nav className="menu">
         <div className="Home-menu-buttons">
-          <button onClick={() => navigate("/EventList")}>Active Classes</button>
-          <button onClick={() => navigate("/Registered")}>Member Login</button>
+          <button onClick={() => navigate("/EventList")}>Aktive arrangementer</button>
+          <button onClick={() => navigate("/Registered")}>Bruker logg inn</button>
           <button onClick={() => setShowLogin((prev) => !prev)}>Admin</button>
         </div>
       </nav>
 
       <main className="content">
         <div className="content-card">
-          <h2>Group Classes</h2>
+          <h2>Gruppetimer</h2>
         </div>
         <div className="content-card">
-          <h2>Personal Training</h2>
+          <h2>Personlig trener</h2>
         </div>
         <div className="content-card">
-          <h2>Modern Equipment</h2>
+          <h2></h2>
         </div>
       </main>
 
       {showLogin && (
         <div className="Admin-login">
-          <h2>Admin Login</h2>
+          <h2>Admin</h2>
           <input
             type="text"
-            placeholder="Username"
+            placeholder="Brukernavn"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
           <input
             type="password"
-            placeholder="Password"
+            placeholder="Passord"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <button onClick={handleLogin}>Log In</button>
+          <button onClick={handleLogin}>Logg Inn</button>
           {error && <p className="error">{error}</p>}
         </div>
       )}

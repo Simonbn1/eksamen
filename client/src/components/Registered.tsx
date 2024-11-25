@@ -149,20 +149,20 @@ const Registered: React.FC = () => {
       <div className="grid-container">
         <header className="header">
           <h1>
-            Welcome to <span className="event">Event</span>
-            <span className="logger">Logger</span>
+            Velkommen til <span className="event">Bruker</span>
+            <span className="logger">Side</span>
           </h1>
         </header>
         <div className="login-links">
-          <LoginButton provider="google">Log in with Google</LoginButton>
-          <LoginButton provider="linkedin">Log in with LinkedIn</LoginButton>
-          <LoginButton provider="entraid">Log in with EntraID</LoginButton>
+          <LoginButton provider="google">Logg inn med Google</LoginButton>
+          <LoginButton provider="linkedin">Logg inn med LinkedIn</LoginButton>
+          <LoginButton provider="entraid">Logg inn med EntraID</LoginButton>
           <button onClick={() => navigate("/")} className="back-home-button">
-            Back
+            Tilbake
           </button>
         </div>
         <div className="login-text">
-          <h2>Log in to see your registered events</h2>
+          <h2>Logg inn for å melde deg på arrangementer</h2>
         </div>
       </div>
     );
@@ -179,8 +179,7 @@ const Registered: React.FC = () => {
         </h1>
       </header>
       <aside className="sidebar">
-        <h2>Welcome {user.name}</h2>
-        <p>User details:</p>
+        <h2>Velkommen {user.name}</h2>
         <div>Email: {user.email}</div>
         <img src={user.picture} alt="User" />
         <button
@@ -192,21 +191,27 @@ const Registered: React.FC = () => {
           }}
           className="logout-button"
         >
-          Log out
+          Logg ut
+        </button>
+        <button
+          className="profile-button"
+            onClick={() => navigate("/Profile")}
+        >
+            Min side
         </button>
       </aside>
       <main className="content">
-        <h2>Available Events</h2>
+        <h2>Tilgjengelige arrangementer</h2>
         <div className="filters">
           <input
             type="text"
-            placeholder="Search by name"
+            placeholder="Søk med navn"
             value={filters.search}
             onChange={(e) => setFilters({ ...filters, search: e.target.value })}
           />
           <input
             type="text"
-            placeholder="Filter by category"
+            placeholder="Kategori"
             value={filters.category}
             onChange={(e) =>
               setFilters({ ...filters, category: e.target.value })
@@ -214,19 +219,19 @@ const Registered: React.FC = () => {
           />
           <input
             type="date"
-            placeholder="Filter by date"
+            placeholder=""
             value={filters.date}
             onChange={(e) => setFilters({ ...filters, date: e.target.value })}
           />
           <input
             type="text"
-            placeholder="Filter by place"
+            placeholder="Sted"
             value={filters.place}
             onChange={(e) => setFilters({ ...filters, place: e.target.value })}
           />
         </div>
         {filteredEvents.length === 0 ? (
-          <p>No events available at the moment.</p>
+          <p>Ingen tilgjengelige arrangementer</p>
         ) : (
           <ul className="event-list">
             {filteredEvents.map((event) => (
@@ -236,19 +241,18 @@ const Registered: React.FC = () => {
                 <p>{event.description}</p>
                 <p>{event.category}</p>
                 <p>{event.place}</p>
+                <div>
                 <button onClick={() => handleJoinEvent(event.title)}>
-                  Join Event
+                  Meld deg på
                 </button>
+                </div>
                 <button onClick={() => handleViewDetails(event.title)}>
-                  View Details
+                  Detaljer
                 </button>
               </li>
             ))}
           </ul>
         )}
-        <button className="profile-button" onClick={() => navigate("/Profile")}>
-          View My Profile
-        </button>
       </main>
     </div>
   );

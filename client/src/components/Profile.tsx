@@ -71,12 +71,11 @@ const Profile: React.FC = () => {
 
   return (
     <div className="profile-container">
-      <h1>{user.name}'s Profile</h1>
-      <p>Email: {user.email}</p>
+      <h1>{user.name}'s Profil</h1>
       <img src={user.picture} alt="User" />
-      <h2>Joined Events</h2>
+      <h2>Mine kommende arrangementer</h2>
       {joinedEvents.length === 0 ? (
-        <p>No joined events.</p>
+        <p>Ingen kommende arrangamenter.</p>
       ) : (
         <ul className="event-list">
           {joinedEvents.map((event) => (
@@ -91,7 +90,7 @@ const Profile: React.FC = () => {
         </ul>
       )}
       <button onClick={() => navigate("/Registered")} className="back-button">
-        Back to Registered
+        Tilbake til registrering
       </button>
     </div>
   );

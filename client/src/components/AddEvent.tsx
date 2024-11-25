@@ -56,7 +56,7 @@ const AddEvent: React.FC = () => {
   return (
     <form className="add-event-form" onSubmit={handleSubmit}>
       <div className="form-group">
-        <label htmlFor="title">Title:</label>
+        <label htmlFor="title">Navn:</label>
         <input
           type="text"
           id="title"
@@ -67,7 +67,7 @@ const AddEvent: React.FC = () => {
         />
       </div>
       <div className="form-group">
-        <label htmlFor="description">Description:</label>
+        <label htmlFor="description">Beskrivelse:</label>
         <textarea
           id="description"
           name="description"
@@ -77,7 +77,7 @@ const AddEvent: React.FC = () => {
         />
       </div>
       <div className="form-group">
-        <label htmlFor="date">Date:</label>
+        <label htmlFor="date">Dato:</label>
         <input
           type="datetime-local"
           id="date"
@@ -88,7 +88,7 @@ const AddEvent: React.FC = () => {
         />
       </div>
       <div className="form-group">
-        <label htmlFor="category">Category:</label>
+        <label htmlFor="category">Kategori:</label>
         <select
           id="category"
           name="category"
@@ -96,10 +96,10 @@ const AddEvent: React.FC = () => {
           onChange={handleInputChange}
           required
         >
-          <option value="">Select a category</option>
-          <option value="Category 1">Category 1</option>
-          <option value="Category 2">Category 2</option>
-          <option value="Category 3">Category 3</option>
+          <option value="">Velg en kategori</option>
+          <option value="Category 1">Kategori 1</option>
+          <option value="Category 2">Kategori 2</option>
+          <option value="Category 3">Kategori 3</option>
         </select>
       </div>
       <div className="form-group">

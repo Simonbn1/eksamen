@@ -33,29 +33,29 @@ const EventList: React.FC = () => {
 
   return (
     <div className="EventList-container">
-      <h1 className="EventList-title">Event List</h1>
+      <h1 className="EventList-title">Aktive arrangementer</h1>
       <div className="event-grid">
         {events.map((event, index) => (
           <div key={index} className="event-card">
             <h2 className="event-title">{event.title}</h2>
             <div className="event-detail">
-              <strong>Category:</strong> {event.category}
+              <strong>Kategori:</strong> {event.category}
             </div>
             <div className="event-detail">
-              <strong>Location:</strong> {event.place}
+              <strong>Lokasjon:</strong> {event.place}
             </div>
             <div className="event-detail">
-              <strong>Date:</strong> {event.date}
+              <strong>Dato:</strong> {event.date}
             </div>
             <div className="event-detail">
-              <strong>Description:</strong> {event.description}
+              <strong>Beskrivelse:</strong> {event.description}
             </div>
           </div>
         ))}
       </div>
       <div className="back">
         <button className="Event-back-button" onClick={() => navigate("/")}>
-          Back
+          Tilbake
         </button>
       </div>
     </div>
