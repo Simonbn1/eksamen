@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 interface Event {
   id: string;
@@ -11,10 +11,10 @@ interface Event {
 }
 
 const YourEvents: React.FC = () => {
+  const navigate = useNavigate();
   const [events, setEvents] = useState<Event[]>([]);
-  const [selectedEventName, setSelectedEventName] = useState<string | null>(
-    null,
-  );
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [attendeeCount, setAttendeeCount] = useState<number | null>(null);
 
   useEffect(() => {
     async function fetchEvents() {
@@ -24,7 +24,17 @@ const YourEvents: React.FC = () => {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
         const data = await response.json();
-        setEvents(data);
+
+        const formattedData = data.map((event: any) => ({
+          id: event._id,
+          title: event.title,
+          date: event.date,
+          description: event.description,
+          category: event.category,
+          place: event.place,
+        }));
+        console.log("Fetched events:", formattedData); // Debug-log
+        setEvents(formattedData);
       } catch (error) {
         console.error("Failed to fetch events:", error);
       }
@@ -33,25 +43,41 @@ const YourEvents: React.FC = () => {
     fetchEvents();
   }, []);
 
-  async function handleDelete(eventName: string) {
+  const handleSelectEvent = async (eventId: string) => {
+    const event = events.find((e) => e.id === eventId);
+    console.log("Selected event:", event); // Debug-log
+    setSelectedEvent(event || null);
+
+    if (event) {
+      try {
+        const response = await fetch(
+          `http://localhost:3000/api/events/${eventId}/attendees`,
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch attendees");
+        }
+        const data = await response.json();
+        setAttendeeCount(data.count);
+      } catch (error) {
+        console.error("Error fetching attendees:", error);
+      }
+    }
+  };
+
+  async function handleDelete(id: string) {
     try {
-      const response = await fetch(
-        `http://localhost:3000/api/event/name/${eventName}`,
-        {
-          method: "DELETE",
-        },
-      );
+      const response = await fetch(`http://localhost:3000/api/event/id/${id}`, {
+        method: "DELETE",
+      });
 
       if (!response.ok) {
         throw new Error("Failed to delete the event");
       }
 
       // Filter out the deleted event in the front-end state
-      setEvents((prevEvents) =>
-        prevEvents.filter((event) => event.title !== eventName),
-      );
+      setEvents((prevEvents) => prevEvents.filter((event) => event.id !== id));
 
-      console.log(`Event with name ${eventName} deleted successfully.`);
+      console.log(`Event with id ${id} deleted successfully.`);
     } catch (error) {
       console.error("Error deleting event:", error);
     }
@@ -61,27 +87,49 @@ const YourEvents: React.FC = () => {
     <div>
       <h1>Your Events</h1>
       <select
-        onChange={(e) => setSelectedEventName(e.target.value)}
-        value={selectedEventName || ""}
+        onChange={(e) => handleSelectEvent(e.target.value)}
+        value={selectedEvent?.id || ""}
       >
         <option value="" disabled>
           Select an event
         </option>
         {events.map((event) => (
-          <option key={event.id} value={event.title}>
+          <option key={event.id} value={event.id}>
             {event.title}
           </option>
         ))}
       </select>
-      {selectedEventName && (
-        <>
-          <Link to={`/EditEvent/${selectedEventName}`}>
-            <button>Edit Event</button>
+      {selectedEvent && (
+        <div>
+          <h2>{selectedEvent.title}</h2>
+          <p>
+            <strong>Description:</strong> {selectedEvent.description}
+          </p>
+          <p>
+            <strong>Date:</strong>{" "}
+            {new Date(selectedEvent.date).toLocaleString()}
+          </p>
+          <p>
+            <strong>Category:</strong> {selectedEvent.category}
+          </p>
+          <p>
+            <strong>Place:</strong> {selectedEvent.place}
+          </p>
+          {attendeeCount !== null && (
+            <p>
+              <strong>Attendees:</strong> {attendeeCount}
+            </p>
+          )}
+          <Link to={`/EditEvent/${selectedEvent.id}`}>
+            <button className="back-button">Edit Event</button>
           </Link>
-          <button onClick={() => handleDelete(selectedEventName)}>
+          <button
+            className="org-back-home-button"
+            onClick={() => handleDelete(selectedEvent.id)}
+          >
             Delete Event
           </button>
-        </>
+        </div>
       )}
     </div>
   );

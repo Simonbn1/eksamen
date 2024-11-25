@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "./style/Profile.css";
 
 interface Event {
@@ -12,69 +12,87 @@ interface Event {
 }
 
 const Profile: React.FC = () => {
-  const [events, setEvents] = useState<Event[]>([]);
+  const [user, setUser] = useState<any>(null);
+  const [joinedEvents, setJoinedEvents] = useState<Event[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    async function fetchRegisteredEvents() {
-      const userId = localStorage.getItem("userId");
+    async function loadUser() {
+      try {
+        const res = await fetch("/api/userinfo");
+        if (res.ok) {
+          const userData = await res.json();
+          setUser(userData);
+        } else {
+          setError(`Error: ${res.status} ${res.statusText}`);
+        }
+      } catch (err) {
+        setError("Network error. Please try again.");
+      }
+    }
 
-      if (!userId) {
-        console.error("No userId found in localStorage");
+    loadUser();
+  }, []);
+
+  useEffect(() => {
+    async function fetchJoinedEvents() {
+      if (!user || !user.id) {
+        console.error("No user logged in or missing userId");
         return;
       }
 
-      console.log("Fetching registered events for userId:", userId); // Debug log
-
       try {
         const response = await fetch(
-          `http://localhost:3000/api/user/events/${userId}`,
+          `/api/user/joined-events?userId=${user.id}`,
         );
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
-
         const data = await response.json();
-        setEvents(data);
+        setJoinedEvents(data);
       } catch (error) {
-        console.error("Failed to fetch registered events:", error);
+        console.error("Failed to fetch joined events:", error);
       }
     }
 
-    fetchRegisteredEvents();
-  }, []);
+    if (user) {
+      fetchJoinedEvents();
+    }
+  }, [user]);
+
+  if (!user) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>{error}</div>;
+  }
 
   return (
     <div className="profile-container">
-      {/* Header Section */}
-      <div className="profile-header">
-        <h1>My Registered Events</h1>
-      </div>
-
-      {/* Navigation Button */}
-      <div className="profile-navigation">
-        <button className="back-button">
-          <Link to="/Registered">Back to Registered</Link>
-        </button>
-      </div>
-
-      {/* Main Content Section */}
-      <div className="profile-main">
-        {events.length === 0 ? (
-          <p>No events joined yet.</p>
-        ) : (
-          <ul className="profile-event-list">
-            {events.map((event) => (
-              <li key={event.id} className="profile-event-card">
-                <h2>{event.title}</h2>
-                <p>{event.date}</p>
-                <p>{event.description}</p>
-                <p>{event.category}</p>
-                <p>{event.place}</p>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      <h1>{user.name}'s Profile</h1>
+      <p>Email: {user.email}</p>
+      <img src={user.picture} alt="User" />
+      <h2>Joined Events</h2>
+      {joinedEvents.length === 0 ? (
+        <p>No joined events.</p>
+      ) : (
+        <ul className="event-list">
+          {joinedEvents.map((event) => (
+            <li key={event.id} className="event-card">
+              <h3>{event.title}</h3>
+              <p>{event.date}</p>
+              <p>{event.description}</p>
+              <p>{event.category}</p>
+              <p>{event.place}</p>
+            </li>
+          ))}
+        </ul>
+      )}
+      <button onClick={() => navigate("/Registered")} className="back-button">
+        Back to Registered
+      </button>
     </div>
   );
 };

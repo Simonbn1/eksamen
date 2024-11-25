@@ -1,149 +1,147 @@
+/* Home.css */
+body {
+  font-family: "Arial", sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+  color: #333;
+}
+
 .Home-grid-container {
   display: grid;
   grid-template-areas:
-    "header header header header header header"
-    "menu image image image image image";
-  gap: 10px;
-  grid-template-rows: auto 1fr;
-  background-color: #f9f9f9;
+    "header"
+    "menu"
+    "content"
+    "footer";
+  grid-template-rows: auto auto 1fr auto;
+  gap: 20px;
   padding: 20px;
-  height: 100vh;
 }
 
-.item1 {
-  grid-area: header;
-}
-.item2 {
-  grid-area: menu;
-}
-.image {
-  grid-area: image;
-}
-
-.item1 {
+.header {
   grid-area: header;
   text-align: center;
-  padding: 30px;
+  background-color: #000;
+  color: #fff;
+  padding: 40px 20px;
 }
 
-.item1 h1 {
-  font-size: 3em;
-  font-family: Arial, sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
+.header h1 {
+  font-size: 2.5em;
   margin: 0;
 }
 
-.event {
-  color: #e63946; /* Fin rød farge */
-  font-weight: bold;
-  font-family: "Arial Black", sans-serif;
+.header p {
+  margin: 10px 0 0;
+  font-size: 1.2em;
+  color: #e74c3c;
 }
 
-.logger {
-  color: #000; /* Svart farge */
-  font-family: "Courier New", Courier, monospace; /* Litt annerledes stil */
-  font-weight: normal;
-}
-
-.grid-item {
-  background-color: rgba(255, 255, 255, 0.8);
-  text-align: center;
-  padding: 20px 0;
-  font-size: 20px;
+.menu {
+  grid-area: menu;
+  display: flex;
+  justify-content: center;
 }
 
 .Home-menu-buttons {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-items: center; /* Sentrerer knappene horisontalt */
+  gap: 15px;
 }
 
 .Home-menu-buttons button {
-  padding: 10px;
-  font-size: 1em;
+  background-color: #e74c3c;
+  color: #fff;
   border: none;
-  border-radius: 5px;
+  padding: 15px 30px;
+  font-size: 1.1em;
   cursor: pointer;
-  background-color: #007bff;
-  color: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+  transition:
+    background-color 0.3s,
+    transform 0.2s;
 }
+
 .Home-menu-buttons button:hover {
-  background-color: #0056b3;
+  background-color: #c0392b;
+  transform: scale(1.05);
 }
 
-.image {
-  grid-area: image;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.content {
+  grid-area: content;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
 }
 
-.image img {
-  max-width: 100%;
-  height: 100%;
-  border-radius: 10px; /* Gir bildet avrundede hjørner */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Lett skygge rundt bildet */
-}
-
-.overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  color: white;
-  text-align: center;
-  background-color: rgba(0, 0, 0, 0.5);
+.content-card {
+  background-color: #fff;
   padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
 }
 
-.overlay h1 {
-  font-size: 2.5em;
-  font-weight: bold;
-  margin-bottom: 10px;
+.content-card h2 {
+  margin: 0 0 10px;
+  color: #333;
 }
 
-.overlay p {
-  font-size: 1.2em;
+.content-card p {
+  color: #777;
+  font-size: 1em;
+  line-height: 1.5;
 }
 
 .Admin-login {
-  margin-top: 1rem;
-  padding: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #f9f9f9;
-  max-width: 300px;
-}
-
-.Admin-login h2 {
-  margin-bottom: 1rem;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
 }
 
 .Admin-login input {
-  display: block;
-  margin-bottom: 0.5rem;
-  width: 100%;
-  padding: 0.5rem;
-  font-size: 1rem;
+  width: 90%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
 
 .Admin-login button {
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
+  background-color: #e74c3c;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1em;
   cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.Admin-login button:hover {
+  background-color: #c0392b;
 }
 
 .error {
-  color: red;
-  margin-top: 0.5rem;
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+.footer {
+  grid-area: footer;
+  text-align: center;
+  background-color: #000;
+  color: #fff;
+  padding: 20px;
+}
+
+.footer a {
+  color: #e74c3c;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.footer a:hover {
+  color: #c0392b;
 }

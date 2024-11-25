@@ -1,5 +1,6 @@
 {
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "@types/node": "^22.9.0",
     "concurrently": "^9.1.0",
     "husky": "^9.1.6",
@@ -16,6 +17,7 @@
     "test:client": "cd client && npm test"
   },
   "dependencies": {
-    "@react-oauth/google": "^0.12.1"
+    "@react-oauth/google": "^0.12.1",
+    "bcrypt": "^5.1.1"
   }
 }

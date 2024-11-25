@@ -1,120 +1,151 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 interface Event {
   id: string;
   title: string;
-  date: string;
   description: string;
-  category?: string;
-  place?: string;
+  date: string;
+  category: string;
+  place: string;
 }
 
 const EditEvent: React.FC = () => {
-  const { eventName } = useParams<{ eventName: string }>();
-  const [event, setEvent] = useState<Event | null>(null);
   const navigate = useNavigate();
+  const { eventId } = useParams<{ eventId: string }>();
+  const [eventData, setEventData] = useState<Event | null>(null);
 
   useEffect(() => {
-    async function fetchEvent() {
+    async function fetchEventDetails() {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/event/${eventName}`,
+          `http://localhost:3000/api/event/id/${eventId}`,
         );
         if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
+          throw new Error("Failed to fetch event details");
         }
         const data = await response.json();
-        setEvent(data);
+        setEventData(data);
       } catch (error) {
-        console.error("Failed to fetch event:", error);
+        console.error("Error fetching event details:", error);
       }
     }
 
-    fetchEvent();
-  }, [eventName]);
+    fetchEventDetails();
+  }, [eventId]);
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
   ) => {
     const { name, value } = e.target;
-    setEvent((prevEvent) =>
-      prevEvent ? { ...prevEvent, [name]: value } : null,
-    );
+    if (eventData) {
+      setEventData({ ...eventData, [name]: value });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!event) return;
+    if (!eventData) return;
+
+    const { id, ...updateData } = eventData;
 
     try {
       const response = await fetch(
-        `http://localhost:3000/api/event/${eventName}`,
+        `http://localhost:3000/api/event/id/${eventId}`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(event),
+          body: JSON.stringify(updateData),
         },
       );
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+      if (response.ok) {
+        alert("Event updated successfully!");
+      } else {
+        alert("Failed to update event. Please try again.");
       }
-      alert("Event updated successfully!");
-      navigate("/Organizer");
     } catch (error) {
-      console.error("Failed to update event:", error);
+      console.error("Error updating event:", error);
     }
   };
 
-  if (!event) return <div>Loading...</div>;
+  if (!eventData) {
+    return <div>Loading...</div>;
+  }
 
   return (
-    <div>
-      <h1>Edit Event</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Title:</label>
-          <input
-            type="text"
-            name="title"
-            value={event.title}
-            onChange={handleInputChange}
-          />
-        </div>
-
-        <div>
-          <label>Date:</label>
-          <input
-            type="datetime-local"
-            name="date"
-            value={event.date}
-            onChange={handleInputChange}
-          />
-        </div>
-
-        <div>
-          <label>Category:</label>
-          <input
-            type="text"
-            name="category"
-            value={event.category}
-            onChange={handleInputChange}
-          />
-        </div>
-        <div>
-          <label>Place:</label>
-          <input
-            type="text"
-            name="place"
-            value={event.place}
-            onChange={handleInputChange}
-          />
-        </div>
-        <button type="submit">Update Event</button>
-      </form>
-    </div>
+    <form className="edit-event-form" onSubmit={handleSubmit}>
+      <div className="form-group">
+        <label htmlFor="title">Title:</label>
+        <input
+          type="text"
+          id="title"
+          name="title"
+          value={eventData.title}
+          onChange={handleInputChange}
+          required
+        />
+      </div>
+      <div className="form-group">
+        <label htmlFor="description">Description:</label>
+        <textarea
+          id="description"
+          name="description"
+          value={eventData.description}
+          onChange={handleInputChange}
+          required
+        />
+      </div>
+      <div className="form-group">
+        <label htmlFor="date">Date:</label>
+        <input
+          type="datetime-local"
+          id="date"
+          name="date"
+          value={eventData.date}
+          onChange={handleInputChange}
+          required
+        />
+      </div>
+      <div className="form-group">
+        <label htmlFor="category">Category:</label>
+        <select
+          id="category"
+          name="category"
+          value={eventData.category}
+          onChange={handleInputChange}
+          required
+        >
+          <option value="">Select a category</option>
+          <option value="Workshop">Workshop</option>
+          <option value="Seminar">Seminar</option>
+          <option value="Conference">Conference</option>
+        </select>
+      </div>
+      <div className="form-group">
+        <label htmlFor="place">Place:</label>
+        <input
+          type="text"
+          id="place"
+          name="place"
+          value={eventData.place}
+          onChange={handleInputChange}
+          required
+        />
+      </div>
+      <button type="submit" className="submit-button">
+        Save Changes
+      </button>
+      <button
+        onClick={() => navigate("/Organizer")}
+        className="back-home-button"
+      >
+        Back
+      </button>
+    </form>
   );
 };
 

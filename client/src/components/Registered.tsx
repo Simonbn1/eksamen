@@ -30,6 +30,13 @@ const Registered: React.FC = () => {
   const [user, setUser] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [events, setEvents] = useState<Event[]>([]);
+  const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
+  const [filters, setFilters] = useState({
+    category: "",
+    date: "",
+    place: "",
+    search: "",
+  });
   const navigate = useNavigate();
   const { addJoinedEvent } = useJoinedEvents();
 
@@ -39,14 +46,7 @@ const Registered: React.FC = () => {
         const res = await fetch("/api/userinfo");
         if (res.ok) {
           const userData = await res.json();
-          console.log("Loaded user data:", userData);
-
-          if (userData.id) {
-            localStorage.setItem("userId", userData.id);
-          } else {
-            console.error("No id found in userData:", userData);
-          }
-
+          localStorage.setItem("userId", userData.id || "");
           setUser(userData);
         } else {
           setError(`Error: ${res.status} ${res.statusText}`);
@@ -63,20 +63,19 @@ const Registered: React.FC = () => {
     async function fetchEvents() {
       try {
         const response = await fetch(`/api/event`);
-        if (!response.ok) {
+        if (!response.ok)
           throw new Error(`HTTP error! Status: ${response.status}`);
-        }
         const data = await response.json();
-        console.log("Fetched events:", data);
-        const mappedEvents = data.map((event: any) => ({
-          id: event._id,
-          title: event.title,
-          date: event.date,
-          description: event.description,
-          category: event.category,
-          place: event.place,
-        }));
-        setEvents(mappedEvents);
+        setEvents(
+          data.map((event: any) => ({
+            id: event._id,
+            title: event.title,
+            date: event.date,
+            description: event.description,
+            category: event.category,
+            place: event.place,
+          })),
+        );
       } catch (error) {
         console.error("Failed to fetch events:", error);
       }
@@ -84,40 +83,56 @@ const Registered: React.FC = () => {
     fetchEvents();
   }, []);
 
-  const handleJoinEvent = async (eventTitle: string) => {
-    try {
-      if (!user || !user.id) {
-        console.error("Invalid or missing userId:", user);
-        throw new Error("Invalid or missing userId");
-      }
+  useEffect(() => {
+    const applyFilters = () => {
+      let filtered = events;
 
-      const event = events.find((event) => event.title === eventTitle);
-      if (!event) {
-        console.error("Event not found:", eventTitle);
-        throw new Error("Event not found");
-      }
-
-      console.log(
-        "Joining event with userId:",
-        user.id,
-        "and eventId:",
-        event.id,
-      );
-
-      const response = await fetch(`/api/join/${event.title}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId: user.id }),
-      });
-
-      if (!response.ok) {
-        const errorMessage = await response.json();
-        throw new Error(
-          errorMessage.message || `HTTP error! Status: ${response.status}`,
+      if (filters.category) {
+        filtered = filtered.filter((event) =>
+          event.category?.includes(filters.category),
         );
       }
+
+      if (filters.date) {
+        filtered = filtered.filter(
+          (event) =>
+            new Date(event.date).toLocaleDateString() ===
+            new Date(filters.date).toLocaleDateString(),
+        );
+      }
+
+      if (filters.place) {
+        filtered = filtered.filter((event) =>
+          event.place?.includes(filters.place),
+        );
+      }
+
+      if (filters.search) {
+        filtered = filtered.filter((event) =>
+          event.title.toLowerCase().includes(filters.search.toLowerCase()),
+        );
+      }
+
+      setFilteredEvents(filtered);
+    };
+
+    applyFilters();
+  }, [filters, events]);
+
+  const handleJoinEvent = async (eventTitle: string) => {
+    try {
+      if (!user?.id) throw new Error("Invalid or missing userId");
+
+      const event = events.find((event) => event.title === eventTitle);
+      if (!event) throw new Error("Event not found");
+
+      const response = await fetch("/api/user/join-event", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user.id, eventId: event.id }),
+      });
+
+      if (!response.ok) throw new Error("Failed to join event");
 
       addJoinedEvent(event);
       alert(`You have successfully joined the event: ${event.title}!`);
@@ -126,19 +141,18 @@ const Registered: React.FC = () => {
     }
   };
 
-  const handleViewDetails = (eventTitle: string) => {
+  const handleViewDetails = (eventTitle: string) =>
     navigate(`/event/${eventTitle}`);
-  };
 
   if (!user) {
     return (
       <div className="grid-container">
-        <div className="header">
+        <header className="header">
           <h1>
             Welcome to <span className="event">Event</span>
             <span className="logger">Logger</span>
           </h1>
-        </div>
+        </header>
         <div className="login-links">
           <LoginButton provider="google">Log in with Google</LoginButton>
           <LoginButton provider="linkedin">Log in with LinkedIn</LoginButton>
@@ -154,19 +168,17 @@ const Registered: React.FC = () => {
     );
   }
 
-  if (error) {
-    return <div>{error}</div>;
-  }
+  if (error) return <div>{error}</div>;
 
   return (
     <div className="user-grid-container">
-      <div className="header">
+      <header className="header">
         <h1>
           Welcome to <span className="event">Event</span>
           <span className="logger">Logger</span>
         </h1>
-      </div>
-      <div className="sidebar">
+      </header>
+      <aside className="sidebar">
         <h2>Welcome {user.name}</h2>
         <p>User details:</p>
         <div>Email: {user.email}</div>
@@ -178,18 +190,46 @@ const Registered: React.FC = () => {
               navigate("/");
             });
           }}
-          className="back-home-button"
+          className="logout-button"
         >
           Log out
         </button>
-      </div>
-      <div className="content">
+      </aside>
+      <main className="content">
         <h2>Available Events</h2>
-        {events.length === 0 ? (
+        <div className="filters">
+          <input
+            type="text"
+            placeholder="Search by name"
+            value={filters.search}
+            onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+          />
+          <input
+            type="text"
+            placeholder="Filter by category"
+            value={filters.category}
+            onChange={(e) =>
+              setFilters({ ...filters, category: e.target.value })
+            }
+          />
+          <input
+            type="date"
+            placeholder="Filter by date"
+            value={filters.date}
+            onChange={(e) => setFilters({ ...filters, date: e.target.value })}
+          />
+          <input
+            type="text"
+            placeholder="Filter by place"
+            value={filters.place}
+            onChange={(e) => setFilters({ ...filters, place: e.target.value })}
+          />
+        </div>
+        {filteredEvents.length === 0 ? (
           <p>No events available at the moment.</p>
         ) : (
           <ul className="event-list">
-            {events.map((event) => (
+            {filteredEvents.map((event) => (
               <li key={event.id} className="event-card">
                 <h3>{event.title}</h3>
                 <p>{event.date}</p>
@@ -209,7 +249,7 @@ const Registered: React.FC = () => {
         <button className="profile-button" onClick={() => navigate("/Profile")}>
           View My Profile
         </button>
-      </div>
+      </main>
     </div>
   );
 };

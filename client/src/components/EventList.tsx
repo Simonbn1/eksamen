@@ -32,8 +32,8 @@ const EventList: React.FC = () => {
   }, []);
 
   return (
-    <div>
-      <h1>Event List</h1>
+    <div className="EventList-container">
+      <h1 className="EventList-title">Event List</h1>
       <div className="event-grid">
         {events.map((event, index) => (
           <div key={index} className="event-card">
@@ -61,4 +61,5 @@ const EventList: React.FC = () => {
     </div>
   );
 };
+
 export default EventList;

@@ -3,6 +3,7 @@ import { MongoClient, ObjectId } from "mongodb";
 import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import bcrypt from "bcrypt";
 
 dotenv.config();
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
@@ -46,10 +47,58 @@ client
       if (search) query.title = { $regex: search, $options: "i" };
 
       try {
+        const eventsCollection = client.db("eventdb").collection("eventdb");
+        const usersCollection = client.db("eventdb").collection("users");
+
+        // Fetch all events
         const events = await eventsCollection.find(query).toArray();
-        res.json(events);
+
+        // Attach attendees count to each event
+        const eventsWithAttendeesCount = await Promise.all(
+          events.map(async (event) => {
+            const attendeeCount = await usersCollection.countDocuments({
+              joinedEvents: event._id.toString(),
+            });
+            return {
+              ...event,
+              attendeesCount: attendeeCount,
+            };
+          }),
+        );
+
+        res.json(eventsWithAttendeesCount);
       } catch (error) {
         console.error("Error fetching events:", error);
+        res.status(500).json({ message: "Internal server error" });
+      }
+    });
+
+    app.get("/api/events/:eventId/users", async (req, res) => {
+      const { eventId } = req.params;
+
+      try {
+        const usersCollection = client.db("eventdb").collection("users");
+        const users = await usersCollection
+          .find({ joinedEvents: eventId })
+          .toArray();
+        res.status(200).json({ count: users.length });
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        res.status(500).json({ message: "Internal server error" });
+      }
+    });
+
+    app.get("/api/events/:eventId/attendees", async (req, res) => {
+      const { eventId } = req.params;
+
+      try {
+        const usersCollection = client.db("eventdb").collection("users");
+        const attendees = await usersCollection
+          .find({ joinedEvents: eventId })
+          .toArray();
+        res.status(200).json({ count: attendees.length });
+      } catch (error) {
+        console.error("Error fetching attendees:", error);
         res.status(500).json({ message: "Internal server error" });
       }
     });
@@ -146,13 +195,133 @@ client
       }
     });
 
+    app.post("/api/user/join-event", async (req, res) => {
+      const { userId, eventId } = req.body;
+
+      if (!userId || !eventId) {
+        return res
+          .status(400)
+          .json({ message: "User ID and Event ID are required" });
+      }
+
+      try {
+        const usersCollection = client.db("eventdb").collection("users");
+
+        // Update the user document to add the event ID to the joined events array
+        const result = await usersCollection.updateOne(
+          { id: userId },
+          { $addToSet: { joinedEvents: eventId } },
+        );
+
+        if (result.modifiedCount === 0) {
+          return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json({ message: "Event joined successfully" });
+      } catch (error) {
+        console.error("Failed to join event:", error);
+        res.status(500).json({ message: "Internal server error" });
+      }
+    });
+
+    app.post("/api/login-admin", async (req, res) => {
+      const { username, password } = req.body;
+
+      try {
+        const usersCollection = client.db("eventdb").collection("users");
+        const user = await usersCollection.findOne({ username });
+        if (!user) {
+          console.log("User not found:", username);
+          return res
+            .status(401)
+            .json({ message: "Invalid username or password" });
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+          console.log("Invalid password for user:", username);
+          return res
+            .status(401)
+            .json({ message: "Invalid username or password" });
+        }
+
+        // Set a cookie or generate a token for the session
+        res.status(200).json({ message: "Login successful" });
+      } catch (error) {
+        console.error("Error during login:", error);
+        res.status(500).json({ message: "Internal server error" });
+      }
+    });
+
+    app.get("/api/user/joined-events", async (req, res) => {
+      const userId = req.query.userId;
+
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
+      }
+
+      try {
+        const usersCollection = client.db("eventdb").collection("users");
+        const eventsCollection = client.db("eventdb").collection("eventdb");
+
+        // Fetch the user by ID
+        const user = await usersCollection.findOne({ id: userId });
+
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+
+        // Fetch events based on joined event IDs
+        const joinedEvents = await eventsCollection
+          .find({
+            _id: {
+              $in: user.joinedEvents.map((id: string) => new ObjectId(id)),
+            },
+          })
+          .toArray();
+
+        res.status(200).json(joinedEvents);
+      } catch (error) {
+        console.error("Failed to fetch joined events:", error);
+        res.status(500).json({ message: "Internal server error" });
+      }
+    });
+
+    app.get("/api/event/:eventId/attendees", async (req, res) => {
+      const { eventId } = req.params;
+
+      if (!ObjectId.isValid(eventId)) {
+        return res.status(400).json({ message: "Invalid eventId" });
+      }
+
+      try {
+        const eventsCollection = db.collection("eventdb");
+        const usersCollection = db.collection("users");
+
+        const event = await eventsCollection.findOne({
+          _id: new ObjectId(eventId),
+        });
+        if (!event) {
+          return res.status(404).json({ message: "Event not found" });
+        }
+
+        const attendees = await usersCollection
+          .find({
+            joinedEvents: { $elemMatch: { $eq: new ObjectId(eventId) } },
+          })
+          .project({ name: 1, email: 1, picture: 1 })
+          .toArray();
+
+        console.log("Attendees for event:", attendees);
+        res.status(200).json(attendees);
+      } catch (error) {
+        console.error("Error fetching attendees:", error);
+        res.status(500).json({ message: "Internal server error" });
+      }
+    });
+
     app.get("/api/user/events/:userId", async (req, res) => {
       const { userId } = req.params;
-
-      // Validate userId
-      if (!userId || !ObjectId.isValid(userId)) {
-        return res.status(400).json({ message: "Invalid userId" });
-      }
 
       try {
         const usersCollection = db.collection("users");
@@ -362,7 +531,7 @@ client
       const discovery_endpoint =
         "https://accounts.google.com/.well-known/openid-configuration";
       const configuration = await fetch(discovery_endpoint);
-      const { token_endpoint } = await configuration.json();
+      const { token_endpoint, userinfo_endpoint } = await configuration.json();
 
       const tokenResult = await fetch(token_endpoint, {
         method: "POST",
@@ -378,10 +547,43 @@ client
 
       if (tokenResult.ok) {
         const { access_token } = await tokenResult.json();
-        res.cookie("access_token", access_token);
-        res.cookie("discovery_endpoint", discovery_endpoint);
+        const userinfoRes = await fetch(userinfo_endpoint, {
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+          },
+        });
 
-        return res.redirect("/Registered");
+        if (userinfoRes.ok) {
+          const userinfo = await userinfoRes.json();
+          const user = {
+            id: userinfo.sub,
+            name: userinfo.name,
+            email: userinfo.email,
+            picture: userinfo.picture,
+            ...userinfo,
+          };
+
+          const usersCollection = client.db("eventdb").collection("users");
+
+          // Upsert user information in the database
+          await usersCollection.updateOne(
+            { id: user.id },
+            { $set: user },
+            { upsert: true },
+          );
+
+          res.cookie("access_token", access_token);
+          res.cookie("discovery_endpoint", discovery_endpoint);
+          return res.redirect("/Registered");
+        } else {
+          console.error(
+            "Google userinfo fetch failed:",
+            await userinfoRes.text(),
+          );
+          return res
+            .status(500)
+            .json({ message: "Failed to fetch Google user info." });
+        }
       } else {
         console.error("Google token fetch failed:", await tokenResult.text());
         return res
@@ -453,6 +655,71 @@ client
         return res
           .status(500)
           .json({ message: "Failed to complete Entraid login." });
+      }
+    });
+
+    app.get("/api/event/id/:id", async (req, res) => {
+      const { id } = req.params;
+      try {
+        const event = await eventsCollection.findOne({ _id: new ObjectId(id) });
+        if (!event) {
+          return res.status(404).json({ message: "Event not found" });
+        }
+        res.json(event);
+      } catch (error) {
+        console.error("Error fetching event:", error);
+        res.status(500).json({ message: "Internal server error" });
+      }
+    });
+
+    app.put("/api/event/id/:id", async (req, res) => {
+      const { id } = req.params;
+      const updatedEvent = req.body;
+
+      if (!ObjectId.isValid(id)) {
+        return res.status(400).json({ message: "Invalid event ID" });
+      }
+
+      try {
+        const { _id, ...updateData } = updatedEvent;
+
+        const result = await eventsCollection.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: updateData },
+        );
+        if (result.modifiedCount === 0) {
+          return res
+            .status(404)
+            .json({ message: "Event not found or no changes made" });
+        }
+        res.status(200).json({ message: "Event updated successfully" });
+      } catch (error) {
+        console.error("Error updating event:", error);
+        res.status(500).json({ message: "Internal server error" });
+      }
+    });
+
+    app.delete("/api/event/id/:id", async (req, res) => {
+      const { id } = req.params;
+
+      try {
+        if (!ObjectId.isValid(id)) {
+          return res.status(400).json({ message: "Invalid event ID" });
+        }
+
+        const result = await eventsCollection.deleteOne({
+          _id: new ObjectId(id),
+        });
+        console.log("Delete result:", result);
+
+        if (result.deletedCount === 0) {
+          return res.status(404).json({ message: "Event not found" });
+        }
+
+        res.status(200).json({ message: "Event deleted successfully" });
+      } catch (error) {
+        console.error("Error deleting event:", error);
+        res.status(500).json({ message: "Internal server error" });
       }
     });
 
