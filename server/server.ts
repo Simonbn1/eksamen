@@ -870,9 +870,6 @@ client.connect().then(() => {
     },
   );
 
-  const staticPath = path.join(__dirname, "../public"); // Update path accordingly
-  app.use(express.static(staticPath));
-
   app.use((req, res, next) => {
     if (req.method === "GET" && !req.path.startsWith("/api")) {
       res.sendFile(path.resolve("../client/dist/index.html"));
@@ -885,7 +882,7 @@ client.connect().then(() => {
     res.sendFile(path.join(__dirname, "../client/dist/index.html"));
   });
 
-  app.listen(port, () => {
+  app.listen(port,() => {
     console.log(`Server is running on http://localhost:${port}`);
   });
 });
