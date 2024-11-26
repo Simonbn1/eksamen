@@ -420,7 +420,6 @@ client
 
         const userinfo = await userinfoRes.json();
         if (userinfoRes.ok) {
-
           const user = {
             id: userinfo.sub, // Map sub to id
             name: userinfo.name,
