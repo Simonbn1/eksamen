@@ -13,34 +13,33 @@ const LINKEDIN_CLIENT_SECRET = process.env.LINKEDIN_CLIENT_SECRET;
 const ENTRAID_CLIENT_ID = process.env.ENTRAID_CLIENT_ID;
 const ENTRAID_CLIENT_SECRET = process.env.ENTRAID_CLIENT_SECRET;
 
-
 const app = express();
 const port = process.env.PORT || 3000;
 
 // Connect to MongoDB
 const client = new MongoClient(process.env["MONGODB_URL"]!);
 client.connect().then(() => {
-    console.log("Connected to MongoDB");
+  console.log("Connected to MongoDB");
 
-    const db = client.db("eventdb");
-    const eventsCollection = db.collection("eventdb");
+  const db = client.db("eventdb");
+  const eventsCollection = db.collection("eventdb");
 
-    // Apply middleware
-    app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
-    app.use(express.json());
-    app.use(cookieParser());
-    app.use(express.static(path.join(__dirname, "../client/dist")));
+  // Apply middleware
+  app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
+  app.use(express.json());
+  app.use(cookieParser());
+  app.use(express.static(path.join(__dirname, "../client/dist")));
 
-    // Define API routes first
-    app.get("/api/event", async (req: Request, res: Response): Promise<void> => {
-        try {
-            const events = await eventsCollection.find().toArray();
-            res.status(200).json(events);
-        } catch (error) {
-            console.error("Error fetching events:", error);
-            res.status(500).json({ message: "Internal server error" });
-        }
-    });
+  // Define API routes first
+  app.get("/api/event", async (req: Request, res: Response): Promise<void> => {
+    try {
+      const events = await eventsCollection.find().toArray();
+      res.status(200).json(events);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
 
   app.get(
     "/api/events/:eventId/users",
