@@ -19,7 +19,7 @@ app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 
-const client = new MongoClient(process.env.MONGODB_URI!);
+const client = new MongoClient(process.env["MONGODB_URL"]!);
 
 client.connect().then(() => {
   console.log("Connected to MongoDB");
