@@ -1,13 +1,13 @@
 {
   "scripts": {
-      "start": "ts-node server/server.ts",
-      "build": "cd client && npm run build",
-      "dev": "concurrently npm:dev:server npm:dev:client",
-      "dev:client": "cd client && npm run dev",
-      "dev:server": "cd server && npm run dev",
-      "prepare": "husky",
-      "test": "prettier --write .",
-      "test:client": "cd client && npm test"
+    "start": "ts-node server/server.ts",
+    "build": "cd client && npm run build",
+    "dev": "concurrently npm:dev:server npm:dev:client",
+    "dev:client": "cd client && npm run dev",
+    "dev:server": "cd server && npm run dev",
+    "prepare": "husky",
+    "test": "prettier --write .",
+    "test:client": "cd client && npm test"
   },
   "dependencies": {
     "@react-oauth/google": "^0.12.1",
