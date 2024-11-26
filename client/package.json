@@ -1,8 +1,8 @@
 {
   "scripts": {
-    "build": "vite build",
+    "build": "react-scripts build",
     "dev": "vite",
-    "start": "node server.ts"
+    "start": "react-scripts start"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.7",
