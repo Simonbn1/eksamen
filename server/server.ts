@@ -867,12 +867,11 @@ client.connect().then(() => {
       }
     },
   );
-    app.get("/", (req: Request, res: Response) => {
-        res.send("Hello, world! Your server is up and running.");
-    });
+  app.get("/", (req: Request, res: Response) => {
+    res.send("Hello, world! Your server is up and running.");
+  });
 
-
-    app.listen(port, () => {
+  app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
   });
 });
