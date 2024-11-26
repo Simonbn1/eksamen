@@ -14,16 +14,16 @@ const ENTRAID_CLIENT_ID = process.env.ENTRAID_CLIENT_ID;
 const ENTRAID_CLIENT_SECRET = process.env.ENTRAID_CLIENT_SECRET;
 
 const app = express();
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
+const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:3000";
 
 async function fetchEvents() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/api/event`);
-        const data = await response.json();
-        console.log('Events:', data);
-    } catch (error) {
-        console.error('Error fetching events:', error);
-    }
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/event`);
+    const data = await response.json();
+    console.log("Events:", data);
+  } catch (error) {
+    console.error("Error fetching events:", error);
+  }
 }
 
 fetchEvents();
@@ -897,5 +897,4 @@ client.connect().then(() => {
   app.get("*", (req, res) => {
     res.sendFile(path.join(__dirname, "../client/dist/index.html"));
   });
-
 });
