@@ -1,8 +1,8 @@
 {
   "scripts": {
-    "dev": "ts-node-dev server.ts",
-    "start": "node server.ts",
-    "build": "tsc -p ."
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "ts-node server/server.ts"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
