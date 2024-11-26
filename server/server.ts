@@ -16,7 +16,6 @@ const ENTRAID_CLIENT_SECRET = process.env.ENTRAID_CLIENT_SECRET;
 const app = express();
 const port = process.env.PORT || 3000;
 
-
 app.use(express.static(path.join(__dirname, "../client/dist")));
 
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
