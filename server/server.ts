@@ -17,7 +17,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.static(path.join(__dirname, "../client/dist")));
-app.use(cors({ origin: process.env.CLIENT_URL , credentials: true }));
+app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 
@@ -29,9 +29,9 @@ client.connect().then(() => {
   const db = client.db("eventdb");
   const eventsCollection = db.collection("eventdb");
 
-    app.get('/', (req, res) => {
-        res.send('Hello, World!');
-    });
+  app.get("/", (req, res) => {
+    res.send("Hello, World!");
+  });
 
   app.get("/api/event", async (req: Request, res: Response): Promise<void> => {
     try {
