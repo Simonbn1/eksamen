@@ -21,112 +21,113 @@ app.use(cookieParser());
 
 const client = new MongoClient(process.env.MONGODB_URI!);
 
-client
-  .connect()
-  .then(() => {
-    console.log("Connected to MongoDB");
+client.connect().then(() => {
+  console.log("Connected to MongoDB");
 
-    const db = client.db("eventdb");
-    const eventsCollection = db.collection("eventdb");
+  const db = client.db("eventdb");
+  const eventsCollection = db.collection("eventdb");
 
-    app.get("/api/event", async (req: Request, res: Response): Promise<void> => {
+  app.get("/api/event", async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { category, place, startTime, endTime, search } = req.query;
+      const query: any = {};
+
+      if (category) query.category = category;
+      if (place) query.place = place;
+      if (startTime || endTime) {
+        query.date = {};
+        if (startTime) query.date.$gte = new Date(startTime as string);
+        if (endTime) query.date.$lte = new Date(endTime as string);
+      }
+      if (search) query.title = { $regex: search, $options: "i" };
+
+      const eventsCollection = client.db("eventdb").collection("eventdb");
+      const usersCollection = client.db("eventdb").collection("users");
+
+      const events = await eventsCollection.find(query).toArray();
+
+      const eventsWithAttendeesCount = await Promise.all(
+        events.map(async (event) => {
+          const attendeeCount = await usersCollection.countDocuments({
+            joinedEvents: event._id.toString(),
+          });
+          return {
+            ...event,
+            attendeesCount: attendeeCount,
+          };
+        }),
+      );
+
+      res.status(200).json(eventsWithAttendeesCount);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get(
+    "/api/events/:eventId/users",
+    async (req: Request, res: Response): Promise<void> => {
+      const { eventId } = req.params;
+
       try {
-        const { category, place, startTime, endTime, search } = req.query;
-        const query: any = {};
-
-        if (category) query.category = category;
-        if (place) query.place = place;
-        if (startTime || endTime) {
-          query.date = {};
-          if (startTime) query.date.$gte = new Date(startTime as string);
-          if (endTime) query.date.$lte = new Date(endTime as string);
-        }
-        if (search) query.title = { $regex: search, $options: "i" };
-
-        const eventsCollection = client.db("eventdb").collection("eventdb");
         const usersCollection = client.db("eventdb").collection("users");
-
-        const events = await eventsCollection.find(query).toArray();
-
-        const eventsWithAttendeesCount = await Promise.all(
-            events.map(async (event) => {
-              const attendeeCount = await usersCollection.countDocuments({
-                joinedEvents: event._id.toString(),
-              });
-              return {
-                ...event,
-                attendeesCount: attendeeCount,
-              };
-            })
-        );
-
-        res.status(200).json(eventsWithAttendeesCount);
+        const users = await usersCollection
+          .find({ joinedEvents: eventId })
+          .toArray();
+        res.status(200).json({ count: users.length });
       } catch (error) {
-        console.error("Error fetching events:", error);
+        console.error("Error fetching users:", error);
         res.status(500).json({ message: "Internal server error" });
       }
-    });
+    },
+  );
 
-    app.get(
-        "/api/events/:eventId/users",
-        async (req: Request, res: Response): Promise<void> => {
-          const { eventId } = req.params;
-
-          try {
-            const usersCollection = client.db("eventdb").collection("users");
-            const users = await usersCollection
-                .find({ joinedEvents: eventId })
-                .toArray();
-            res.status(200).json({ count: users.length });
-          } catch (error) {
-            console.error("Error fetching users:", error);
-            res.status(500).json({ message: "Internal server error" });
-          }
-        }
-    );
-
-    app.get(
-        "/api/events/:eventId/attendees",
-        async (req: Request, res: Response): Promise<void> => {
-          const { eventId } = req.params;
-
-          try {
-            const usersCollection = client.db("eventdb").collection("users");
-            const attendees = await usersCollection
-                .find({ joinedEvents: eventId })
-                .toArray();
-            res.status(200).json({ count: attendees.length });
-          } catch (error) {
-            console.error("Error fetching attendees:", error);
-            res.status(500).json({ message: "Internal server error" });
-          }
-        }
-    );
-
-
-    app.post("/api/event", async (req: Request, res: Response): Promise<void> => {
-      const newEvent = req.body;
+  app.get(
+    "/api/events/:eventId/attendees",
+    async (req: Request, res: Response): Promise<void> => {
+      const { eventId } = req.params;
 
       try {
-        const existingEvent = await eventsCollection.findOne({
-          title: newEvent.title,
-        });
-
-        if (existingEvent) {
-          res.status(400).json({ message: "Event with the same title already exists" });
-          return;
-        }
-
-        const result = await eventsCollection.insertOne(newEvent);
-        newEvent._id = result.insertedId;
-        res.status(201).json(newEvent);
+        const usersCollection = client.db("eventdb").collection("users");
+        const attendees = await usersCollection
+          .find({ joinedEvents: eventId })
+          .toArray();
+        res.status(200).json({ count: attendees.length });
       } catch (error) {
-        console.error("Error saving event:", error);
-        res.status(400).json({ message: "Error saving event" });
+        console.error("Error fetching attendees:", error);
+        res.status(500).json({ message: "Internal server error" });
       }
-    });
+    },
+  );
 
-    app.get("/api/event/:eventTitle", async (req: Request, res: Response): Promise<void> => {
+  app.post("/api/event", async (req: Request, res: Response): Promise<void> => {
+    const newEvent = req.body;
+
+    try {
+      const existingEvent = await eventsCollection.findOne({
+        title: newEvent.title,
+      });
+
+      if (existingEvent) {
+        res
+          .status(400)
+          .json({ message: "Event with the same title already exists" });
+        return;
+      }
+
+      const result = await eventsCollection.insertOne(newEvent);
+      newEvent._id = result.insertedId;
+      res.status(201).json(newEvent);
+    } catch (error) {
+      console.error("Error saving event:", error);
+      res.status(400).json({ message: "Error saving event" });
+    }
+  });
+
+  app.get(
+    "/api/event/:eventTitle",
+    async (req: Request, res: Response): Promise<void> => {
       const { eventTitle } = req.params;
 
       try {
@@ -137,8 +138,8 @@ client
         }
 
         const organizer = await db
-            .collection("users")
-            .findOne({ _id: new ObjectId(event.organizerId) });
+          .collection("users")
+          .findOne({ _id: new ObjectId(event.organizerId) });
 
         if (!organizer) {
           res.status(404).json({ message: "Organizer not found" });
@@ -159,10 +160,12 @@ client
         console.error("Error fetching event details:", error);
         res.status(500).json({ message: "Internal server error" });
       }
-    });
+    },
+  );
 
-
-    app.post("/api/join/:eventTitle", async (req: Request, res: Response): Promise<void> => {
+  app.post(
+    "/api/join/:eventTitle",
+    async (req: Request, res: Response): Promise<void> => {
       const { eventTitle } = req.params;
       const { userId } = req.body;
 
@@ -185,9 +188,9 @@ client
         }
 
         const result = await usersCollection.updateOne(
-            { _id: userId },
-            { $addToSet: { joinedEvents: event._id } },
-            { upsert: true }
+          { _id: userId },
+          { $addToSet: { joinedEvents: event._id } },
+          { upsert: true },
         );
 
         if (result.modifiedCount === 0 && result.upsertedCount === 0) {
@@ -204,9 +207,12 @@ client
         console.error("Error joining event:", error);
         res.status(500).json({ message: "Internal server error" });
       }
-    });
+    },
+  );
 
-    app.post("/api/user/join-event", async (req: Request, res: Response): Promise<void> => {
+  app.post(
+    "/api/user/join-event",
+    async (req: Request, res: Response): Promise<void> => {
       const { userId, eventId } = req.body;
 
       if (!userId || !eventId) {
@@ -221,8 +227,8 @@ client
 
         // Update the user document to add the event ID to the joined events array
         const result = await usersCollection.updateOne(
-            { id: userId },
-            { $addToSet: { joinedEvents: eventId } }
+          { id: userId },
+          { $addToSet: { joinedEvents: eventId } },
         );
 
         if (result.modifiedCount === 0) {
@@ -235,10 +241,12 @@ client
         console.error("Failed to join event:", error);
         res.status(500).json({ message: "Internal server error" });
       }
-    });
+    },
+  );
 
-
-    app.get("/api/user/joined-events", async (req: Request, res: Response): Promise<void> => {
+  app.get(
+    "/api/user/joined-events",
+    async (req: Request, res: Response): Promise<void> => {
       const userId = req.query.userId;
 
       if (!userId) {
@@ -258,21 +266,24 @@ client
         }
 
         const joinedEvents = await eventsCollection
-            .find({
-              _id: {
-                $in: user.joinedEvents.map((id: string) => new ObjectId(id)),
-              },
-            })
-            .toArray();
+          .find({
+            _id: {
+              $in: user.joinedEvents.map((id: string) => new ObjectId(id)),
+            },
+          })
+          .toArray();
 
         res.status(200).json(joinedEvents);
       } catch (error) {
         console.error("Failed to fetch joined events:", error);
         res.status(500).json({ message: "Internal server error" });
       }
-    });
+    },
+  );
 
-    app.get("/api/event/:eventId/attendees", async (req: Request, res: Response): Promise<void> => {
+  app.get(
+    "/api/event/:eventId/attendees",
+    async (req: Request, res: Response): Promise<void> => {
       const { eventId } = req.params;
 
       if (!ObjectId.isValid(eventId)) {
@@ -294,11 +305,11 @@ client
         }
 
         const attendees = await usersCollection
-            .find({
-              joinedEvents: { $elemMatch: { $eq: new ObjectId(eventId) } },
-            })
-            .project({ name: 1, email: 1, picture: 1 })
-            .toArray();
+          .find({
+            joinedEvents: { $elemMatch: { $eq: new ObjectId(eventId) } },
+          })
+          .project({ name: 1, email: 1, picture: 1 })
+          .toArray();
 
         console.log("Attendees for event:", attendees);
         res.status(200).json(attendees);
@@ -306,10 +317,12 @@ client
         console.error("Error fetching attendees:", error);
         res.status(500).json({ message: "Internal server error" });
       }
-    });
+    },
+  );
 
-
-    app.get("/api/user/events/:userId", async (req: Request, res: Response): Promise<void> => {
+  app.get(
+    "/api/user/events/:userId",
+    async (req: Request, res: Response): Promise<void> => {
       const { userId } = req.params;
 
       try {
@@ -326,19 +339,24 @@ client
         }
 
         const events = await eventsCollection
-            .find({ _id: { $in: user.joinedEvents } })
-            .toArray();
+          .find({ _id: { $in: user.joinedEvents } })
+          .toArray();
 
         res.json(events);
       } catch (error) {
-        console.error(`Error fetching user events: userId=${userId}, error=${error}`);
+        console.error(
+          `Error fetching user events: userId=${userId}, error=${error}`,
+        );
         res.status(500).json({
           message: "Failed to fetch user events. Please try again later.",
         });
       }
-    });
+    },
+  );
 
-    app.get("/api/user/events/:userId", async (req: Request, res: Response): Promise<void> => {
+  app.get(
+    "/api/user/events/:userId",
+    async (req: Request, res: Response): Promise<void> => {
       const { userId } = req.params;
 
       try {
@@ -355,67 +373,70 @@ client
         }
 
         const events = await eventsCollection
-            .find({ _id: { $in: user.joinedEvents } })
-            .toArray();
+          .find({ _id: { $in: user.joinedEvents } })
+          .toArray();
 
         res.json(events);
       } catch (error) {
         console.error("Error fetching user events:", error);
         res.status(500).json({ message: "Internal server error" });
       }
-    });
+    },
+  );
 
-    app.put(
-        "/api/event/name/:eventName",
-        async (req: Request, res: Response): Promise<void> => {
-          const { eventName } = req.params;
-          const updatedEvent = req.body;
+  app.put(
+    "/api/event/name/:eventName",
+    async (req: Request, res: Response): Promise<void> => {
+      const { eventName } = req.params;
+      const updatedEvent = req.body;
 
-          try {
-            const result = await eventsCollection.updateOne(
-                { title: eventName },
-                { $set: updatedEvent },
-            );
+      try {
+        const result = await eventsCollection.updateOne(
+          { title: eventName },
+          { $set: updatedEvent },
+        );
 
-            if (result.modifiedCount === 0) {
-              res.status(404).json({
-                message: "Event not found or no changes made",
-              });
-              return; // Ensure function stops execution after sending response
-            }
+        if (result.modifiedCount === 0) {
+          res.status(404).json({
+            message: "Event not found or no changes made",
+          });
+          return; // Ensure function stops execution after sending response
+        }
 
-            res.status(200).json({ message: "Event updated successfully" });
-          } catch (error) {
-            console.error("Error updating event:", error);
-            res.status(500).json({ message: "Internal server error" });
-          }
-        },
-    );
+        res.status(200).json({ message: "Event updated successfully" });
+      } catch (error) {
+        console.error("Error updating event:", error);
+        res.status(500).json({ message: "Internal server error" });
+      }
+    },
+  );
 
-    app.delete(
-        "/api/event/name/:eventName",
-        async (req: Request, res: Response): Promise<void> => {
-          const { eventName } = req.params;
-          console.log("Attempting to delete event with name:", eventName);
+  app.delete(
+    "/api/event/name/:eventName",
+    async (req: Request, res: Response): Promise<void> => {
+      const { eventName } = req.params;
+      console.log("Attempting to delete event with name:", eventName);
 
-          try {
-            const result = await eventsCollection.deleteOne({ title: eventName });
-            console.log("Delete result:", result);
+      try {
+        const result = await eventsCollection.deleteOne({ title: eventName });
+        console.log("Delete result:", result);
 
-            if (result.deletedCount === 0) {
-              res.status(404).json({ message: "Event not found" });
-              return; // Ensure function stops execution after sending response
-            }
+        if (result.deletedCount === 0) {
+          res.status(404).json({ message: "Event not found" });
+          return; // Ensure function stops execution after sending response
+        }
 
-            res.status(200).json({ message: "Event deleted successfully" });
-          } catch (error) {
-            console.error("Error deleting event:", error);
-            res.status(500).json({ message: "Internal server error" });
-          }
-        },
-    );
+        res.status(200).json({ message: "Event deleted successfully" });
+      } catch (error) {
+        console.error("Error deleting event:", error);
+        res.status(500).json({ message: "Internal server error" });
+      }
+    },
+  );
 
-    app.get("/api/userinfo", async (req: Request, res: Response): Promise<void> => {
+  app.get(
+    "/api/userinfo",
+    async (req: Request, res: Response): Promise<void> => {
       const { access_token, discovery_endpoint } = req.cookies;
 
       if (access_token) {
@@ -452,25 +473,27 @@ client
       }
 
       res.sendStatus(401); // Unauthorized
-    });
+    },
+  );
 
-    app.post("/api/login", (req: Request, res: Response): void => {
-      const { access_token, discovery_endpoint } = req.body;
-      res.cookie("access_token", access_token);
-      res.cookie("discovery_endpoint", discovery_endpoint);
-      res.sendStatus(201); // Created
-    });
+  app.post("/api/login", (req: Request, res: Response): void => {
+    const { access_token, discovery_endpoint } = req.body;
+    res.cookie("access_token", access_token);
+    res.cookie("discovery_endpoint", discovery_endpoint);
+    res.sendStatus(201); // Created
+  });
 
-    app.get("/api/login/end_session", (req: Request, res: Response): void => {
-      res.clearCookie("access_token");
-      res.clearCookie("discovery_endpoint");
-      res.redirect("/");
-    });
+  app.get("/api/login/end_session", (req: Request, res: Response): void => {
+    res.clearCookie("access_token");
+    res.clearCookie("discovery_endpoint");
+    res.redirect("/");
+  });
 
-
-    app.get("/api/login/entraid/start", async (req: Request, res: Response): Promise<void> => {
+  app.get(
+    "/api/login/entraid/start",
+    async (req: Request, res: Response): Promise<void> => {
       const discovery_endpoint =
-          "https://login.microsoftonline.com/organizations/v2.0/.well-known/openid-configuration";
+        "https://login.microsoftonline.com/organizations/v2.0/.well-known/openid-configuration";
       const client_id = ENTRAID_CLIENT_ID || "";
 
       if (!client_id) {
@@ -497,11 +520,14 @@ client
         console.error("Error during EntraID login start:", error);
         res.status(500).json({ message: "Failed to initiate login process" });
       }
-    });
+    },
+  );
 
-    app.get("/api/login/linkedin/start", async (req: Request, res: Response): Promise<void> => {
+  app.get(
+    "/api/login/linkedin/start",
+    async (req: Request, res: Response): Promise<void> => {
       const discovery_endpoint =
-          "https://www.linkedin.com/oauth/.well-known/openid-configuration";
+        "https://www.linkedin.com/oauth/.well-known/openid-configuration";
       const client_id = LINKEDIN_CLIENT_ID || "";
 
       if (!client_id) {
@@ -528,12 +554,14 @@ client
         console.error("Error during LinkedIn login start:", error);
         res.status(500).json({ message: "Failed to initiate login process" });
       }
-    });
+    },
+  );
 
-
-    app.get("/api/login/google/start", async (req: Request, res: Response): Promise<void> => {
+  app.get(
+    "/api/login/google/start",
+    async (req: Request, res: Response): Promise<void> => {
       const discovery_endpoint =
-          "https://accounts.google.com/.well-known/openid-configuration";
+        "https://accounts.google.com/.well-known/openid-configuration";
       const client_id = GOOGLE_CLIENT_ID || "";
 
       if (!client_id) {
@@ -558,11 +586,16 @@ client
         res.redirect(authorization_url);
       } catch (error) {
         console.error("Error initiating Google login:", error);
-        res.status(500).json({ message: "Failed to initiate Google login process." });
+        res
+          .status(500)
+          .json({ message: "Failed to initiate Google login process." });
       }
-    });
+    },
+  );
 
-    app.get("/api/login/google/callback", async (req: Request, res: Response): Promise<void> => {
+  app.get(
+    "/api/login/google/callback",
+    async (req: Request, res: Response): Promise<void> => {
       const { code } = req.query;
 
       if (!code) {
@@ -571,11 +604,12 @@ client
       }
 
       const discovery_endpoint =
-          "https://accounts.google.com/.well-known/openid-configuration";
+        "https://accounts.google.com/.well-known/openid-configuration";
 
       try {
         const configuration = await fetch(discovery_endpoint);
-        const { token_endpoint, userinfo_endpoint } = await configuration.json();
+        const { token_endpoint, userinfo_endpoint } =
+          await configuration.json();
 
         const tokenResult = await fetch(token_endpoint, {
           method: "POST",
@@ -611,16 +645,19 @@ client
             const usersCollection = client.db("eventdb").collection("users");
 
             await usersCollection.updateOne(
-                { id: user.id },
-                { $set: user },
-                { upsert: true },
+              { id: user.id },
+              { $set: user },
+              { upsert: true },
             );
 
             res.cookie("access_token", access_token);
             res.cookie("discovery_endpoint", discovery_endpoint);
             res.redirect("/Registered");
           } else {
-            console.error("Google userinfo fetch failed:", await userinfoRes.text());
+            console.error(
+              "Google userinfo fetch failed:",
+              await userinfoRes.text(),
+            );
             res.status(500).json({
               message: "Failed to fetch Google user info.",
             });
@@ -633,106 +670,120 @@ client
         }
       } catch (error) {
         console.error("Error during Google login callback:", error);
-        res.status(500).json({ message: "An error occurred during Google login." });
+        res
+          .status(500)
+          .json({ message: "An error occurred during Google login." });
       }
-    });
+    },
+  );
 
+  app.get(
+    "/api/login/linkedin/callback",
+    async (req: Request, res: Response): Promise<void> => {
+      const { code } = req.query;
+      if (!code) {
+        res.status(400).json({ message: "Authorization code is missing" });
+        return; // Stop further execution after responding
+      }
 
-    app.get(
-        "/api/login/linkedin/callback",
-        async (req: Request, res: Response): Promise<void> => {
-          const { code } = req.query;
-          if (!code) {
-            res.status(400).json({ message: "Authorization code is missing" });
-            return; // Stop further execution after responding
-          }
+      const discovery_endpoint =
+        "https://www.linkedin.com/oauth/.well-known/openid-configuration";
 
-          const discovery_endpoint =
-              "https://www.linkedin.com/oauth/.well-known/openid-configuration";
+      try {
+        const configuration = await fetch(discovery_endpoint);
+        const { token_endpoint } = await configuration.json();
 
-          try {
-            const configuration = await fetch(discovery_endpoint);
-            const { token_endpoint } = await configuration.json();
+        const tokenResult = await fetch(token_endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            grant_type: "authorization_code",
+            client_id: LINKEDIN_CLIENT_ID!,
+            client_secret: LINKEDIN_CLIENT_SECRET!,
+            code: code as string,
+            redirect_uri: `${req.protocol}://${req.headers.host}/api/login/linkedin/callback`,
+          }),
+        });
 
-            const tokenResult = await fetch(token_endpoint, {
-              method: "POST",
-              headers: { "Content-Type": "application/x-www-form-urlencoded" },
-              body: new URLSearchParams({
-                grant_type: "authorization_code",
-                client_id: LINKEDIN_CLIENT_ID!,
-                client_secret: LINKEDIN_CLIENT_SECRET!,
-                code: code as string,
-                redirect_uri: `${req.protocol}://${req.headers.host}/api/login/linkedin/callback`,
-              }),
-            });
+        if (tokenResult.ok) {
+          const { access_token } = await tokenResult.json();
+          res.cookie("access_token", access_token);
+          res.cookie("discovery_endpoint", discovery_endpoint);
 
-            if (tokenResult.ok) {
-              const { access_token } = await tokenResult.json();
-              res.cookie("access_token", access_token);
-              res.cookie("discovery_endpoint", discovery_endpoint);
-
-              res.redirect("/Registered");
-            } else {
-              console.error("Linkedin token fetch failed:", await tokenResult.text());
-              res.status(500).json({
-                message: "Failed to complete Linkedin login.",
-              });
-            }
-          } catch (error) {
-            console.error("Error during LinkedIn login callback:", error);
-            res.status(500).json({ message: "An error occurred during LinkedIn login." });
-          }
+          res.redirect("/Registered");
+        } else {
+          console.error(
+            "Linkedin token fetch failed:",
+            await tokenResult.text(),
+          );
+          res.status(500).json({
+            message: "Failed to complete Linkedin login.",
+          });
         }
-    );
+      } catch (error) {
+        console.error("Error during LinkedIn login callback:", error);
+        res
+          .status(500)
+          .json({ message: "An error occurred during LinkedIn login." });
+      }
+    },
+  );
 
-    app.get(
-        "/api/login/entraid/callback",
-        async (req: Request, res: Response): Promise<void> => {
-          const { code } = req.query;
-          if (!code) {
-            res.status(400).json({ message: "Authorization code is missing" });
-            return; // Stop further execution after responding
-          }
+  app.get(
+    "/api/login/entraid/callback",
+    async (req: Request, res: Response): Promise<void> => {
+      const { code } = req.query;
+      if (!code) {
+        res.status(400).json({ message: "Authorization code is missing" });
+        return; // Stop further execution after responding
+      }
 
-          const discovery_endpoint =
-              "https://login.microsoftonline.com/organizations/v2.0/.well-known/openid-configuration";
+      const discovery_endpoint =
+        "https://login.microsoftonline.com/organizations/v2.0/.well-known/openid-configuration";
 
-          try {
-            const configuration = await fetch(discovery_endpoint);
-            const { token_endpoint } = await configuration.json();
+      try {
+        const configuration = await fetch(discovery_endpoint);
+        const { token_endpoint } = await configuration.json();
 
-            const tokenResult = await fetch(token_endpoint, {
-              method: "POST",
-              headers: { "Content-Type": "application/x-www-form-urlencoded" },
-              body: new URLSearchParams({
-                grant_type: "authorization_code",
-                client_id: ENTRAID_CLIENT_ID!,
-                client_secret: ENTRAID_CLIENT_SECRET!,
-                code: code as string,
-                redirect_uri: `${req.protocol}://${req.headers.host}/api/login/entraid/callback`,
-              }),
-            });
+        const tokenResult = await fetch(token_endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            grant_type: "authorization_code",
+            client_id: ENTRAID_CLIENT_ID!,
+            client_secret: ENTRAID_CLIENT_SECRET!,
+            code: code as string,
+            redirect_uri: `${req.protocol}://${req.headers.host}/api/login/entraid/callback`,
+          }),
+        });
 
-            if (tokenResult.ok) {
-              const { access_token } = await tokenResult.json();
-              res.cookie("access_token", access_token);
-              res.cookie("discovery_endpoint", discovery_endpoint);
+        if (tokenResult.ok) {
+          const { access_token } = await tokenResult.json();
+          res.cookie("access_token", access_token);
+          res.cookie("discovery_endpoint", discovery_endpoint);
 
-              res.redirect("/Registered");
-            } else {
-              console.error("Entraid token fetch failed:", await tokenResult.text());
-              res.status(500).json({
-                message: "Failed to complete Entraid login.",
-              });
-            }
-          } catch (error) {
-            console.error("Error during EntraID login callback:", error);
-            res.status(500).json({ message: "An error occurred during EntraID login." });
-          }
+          res.redirect("/Registered");
+        } else {
+          console.error(
+            "Entraid token fetch failed:",
+            await tokenResult.text(),
+          );
+          res.status(500).json({
+            message: "Failed to complete Entraid login.",
+          });
         }
-    );
+      } catch (error) {
+        console.error("Error during EntraID login callback:", error);
+        res
+          .status(500)
+          .json({ message: "An error occurred during EntraID login." });
+      }
+    },
+  );
 
-    app.get("/api/event/id/:id", async (req: Request, res: Response): Promise<void> => {
+  app.get(
+    "/api/event/id/:id",
+    async (req: Request, res: Response): Promise<void> => {
       const { id } = req.params;
 
       if (!ObjectId.isValid(id)) {
@@ -753,9 +804,12 @@ client
         console.error("Error fetching event:", error);
         res.status(500).json({ message: "Internal server error" });
       }
-    });
+    },
+  );
 
-    app.put("/api/event/id/:id", async (req: Request, res: Response): Promise<void> => {
+  app.put(
+    "/api/event/id/:id",
+    async (req: Request, res: Response): Promise<void> => {
       const { id } = req.params;
       const updatedEvent = req.body;
 
@@ -768,8 +822,8 @@ client
         const { _id, ...updateData } = updatedEvent;
 
         const result = await eventsCollection.updateOne(
-            { _id: new ObjectId(id) },
-            { $set: updateData },
+          { _id: new ObjectId(id) },
+          { $set: updateData },
         );
         if (result.modifiedCount === 0) {
           res.status(404).json({
@@ -782,9 +836,12 @@ client
         console.error("Error updating event:", error);
         res.status(500).json({ message: "Internal server error" });
       }
-    });
+    },
+  );
 
-    app.delete("/api/event/id/:id", async (req: Request, res: Response): Promise<void> => {
+  app.delete(
+    "/api/event/id/:id",
+    async (req: Request, res: Response): Promise<void> => {
       const { id } = req.params;
 
       if (!ObjectId.isValid(id)) {
@@ -808,9 +865,10 @@ client
         console.error("Error deleting event:", error);
         res.status(500).json({ message: "Internal server error" });
       }
-    });
+    },
+  );
 
-    app.listen(port, () => {
-      console.log(`Server is running on http://localhost:${port}`);
-    });
-    })
+  app.listen(port, () => {
+    console.log(`Server is running on http://localhost:${port}`);
+  });
+});
