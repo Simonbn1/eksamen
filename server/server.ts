@@ -717,3 +717,5 @@ client
   .catch((err) => {
     console.error("Failed to connect to MongoDB:", err);
   });
+
+app.listen(process.env.PORT || 3000);
