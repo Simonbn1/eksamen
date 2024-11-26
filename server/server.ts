@@ -14,7 +14,17 @@ const ENTRAID_CLIENT_ID = process.env.ENTRAID_CLIENT_ID;
 const ENTRAID_CLIENT_SECRET = process.env.ENTRAID_CLIENT_SECRET;
 
 const app = express();
-const port = parseInt(process.env.PORT || "3000", 10);
+const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
+
+fetch(`${apiBaseUrl}/event`)
+    .then(response => response.json())
+    .then(data => {
+        // handle your data
+    });
+
+app.use(cors({ origin: process.env.CLIENT_URL || '*', credentials: true }));
+app.use(cors({ origin: true, credentials: true }));
+
 
 app.use(express.static(path.join(__dirname, "../client/dist")));
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
@@ -885,22 +895,7 @@ client.connect().then(() => {
     }
   });
 
-  app.get("api/event", async (req: Request, res: Response): Promise<void> => {
-    try {
-      const eventsCollection = client.db("eventdb").collection("eventdb");
-      const events = await eventsCollection.find().toArray();
-      res.status(200).json(events);
-    } catch (error) {
-      console.error("Error fetching events:", error);
-      res.status(500).json({ message: "Internal server error" });
-    }
-  });
-
   app.use(express.static(path.join(__dirname, "../client/dist")));
-
-  app.listen(port, "0.0.0.0", () => {
-    console.log(`Server is running on port ${port}`);
-  });
 
   app.get("*", (req, res) => {
     res.sendFile(path.join(__dirname, "../client/dist/index.html"));
