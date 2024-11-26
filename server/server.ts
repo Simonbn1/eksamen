@@ -216,7 +216,6 @@ client
       }
     });
 
-
     app.get("/api/user/joined-events", async (req, res) => {
       const userId = req.query.userId;
 
