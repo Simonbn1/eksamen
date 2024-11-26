@@ -17,10 +17,12 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 const allowedOrigins = process.env.CLIENT_URL?.split(",") || [];
-app.use(cors({
+app.use(
+  cors({
     origin: allowedOrigins,
     credentials: true,
-}));
+  }),
+);
 
 app.use(express.json());
 app.use(cookieParser());
