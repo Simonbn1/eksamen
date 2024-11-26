@@ -40,15 +40,15 @@ client.connect().then(() => {
     res.send("Hello, World!");
   });
 
-    app.get("/api/event", async (req: Request, res: Response): Promise<void> => {
-        try {
-            const events = await eventsCollection.find().toArray();
-            res.status(200).json(events);
-        } catch (error) {
-            console.error("Error fetching events:", error);
-            res.status(500).json({ message: "Internal server error" });
-        }
-    });
+  app.get("/api/event", async (req: Request, res: Response): Promise<void> => {
+    try {
+      const events = await eventsCollection.find().toArray();
+      res.status(200).json(events);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
 
   app.get(
     "/api/events/:eventId/users",

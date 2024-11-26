@@ -25,7 +25,9 @@ const EventList: React.FC = () => {
         console.log("Response Text:", text);
 
         if (!response.ok) {
-          throw new Error(`Failed to fetch events. Status code: ${response.status}`);
+          throw new Error(
+            `Failed to fetch events. Status code: ${response.status}`,
+          );
         }
 
         return JSON.parse(text); // Parse only if the response is expected to be JSON
