@@ -895,8 +895,7 @@ client.connect().then(() => {
     console.log(`Server is running on http://localhost:${port}`);
   });
 
-    app.get("*", (req, res) => {
-        res.sendFile(path.resolve(__dirname, "../client/dist/index.html"));
-    });
-
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(__dirname, "../client/dist/index.html"));
+  });
 });
