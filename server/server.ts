@@ -29,8 +29,8 @@ client
     const db = client.db("eventdb");
     const eventsCollection = db.collection("eventdb");
 
-    app.get("/api/event", async (Request: Request, Response: Response) => {
-      const { category, place, startTime, endTime, search } = Request.query;
+    app.get("/api/event", async (req: Request, res: Response) => {
+      const { category, place, startTime, endTime, search } = req.query;
       const query: any = {};
 
       if (category) query.category = category;
@@ -61,84 +61,84 @@ client
         Response.json(eventsWithAttendeesCount);
       } catch (error) {
         console.error("Error fetching events:", error);
-        Response.status(500).json({ message: "Internal server error" });
+        res.status(500).json({ message: "Internal server error" });
       }
     });
 
     app.get(
       "/api/events/:eventId/users",
-      async (Request: Request, Response: Response) => {
-        const { eventId } = Request.params;
+      async (req: Request, res: Response) => {
+        const { eventId } = req.params;
 
         try {
           const usersCollection = client.db("eventdb").collection("users");
           const users = await usersCollection
             .find({ joinedEvents: eventId })
             .toArray();
-          Response.status(200).json({ count: users.length });
+          res.status(200).json({ count: users.length });
         } catch (error) {
           console.error("Error fetching users:", error);
-          Response.status(500).json({ message: "Internal server error" });
+          res.status(500).json({ message: "Internal server error" });
         }
       },
     );
 
     app.get(
       "/api/events/:eventId/attendees",
-      async (Request: Request, Response: Response) => {
-        const { eventId } = Request.params;
+      async (req: Request, res: Response) => {
+        const { eventId } = req.params;
 
         try {
           const usersCollection = client.db("eventdb").collection("users");
           const attendees = await usersCollection
             .find({ joinedEvents: eventId })
             .toArray();
-          Response.status(200).json({ count: attendees.length });
+          res.status(200).json({ count: attendees.length });
         } catch (error) {
           console.error("Error fetching attendees:", error);
-          Response.status(500).json({ message: "Internal server error" });
+          res.status(500).json({ message: "Internal server error" });
         }
       },
     );
 
-    app.post("/api/event", async (Request: Request, Response: Response) => {
-      const newEvent = Request.body;
+    app.post("/api/event", async (req: Request, res: Response) => {
+      const newEvent = req.body;
 
       try {
         const existingEvent = await eventsCollection.findOne({
           title: newEvent.title,
         });
         if (existingEvent) {
-          return Response.status(400).json({
+          return res.status(400).json({
             message: "Event with the same title already exists",
           });
         }
 
         const result = await eventsCollection.insertOne(newEvent);
         newEvent._id = result.insertedId;
-        Response.status(201).json(newEvent);
+        res.status(201).json(newEvent);
       } catch (error) {
         console.error("Error saving event:", error);
-        Response.status(400).json({ message: "Error saving event" });
+        res.status(400).json({ message: "Error saving event" });
       }
     });
 
     app.get(
       "/api/event/:eventTitle",
-      async (Request: Request, Response: Response) => {
-        const { eventTitle } = Request.params;
+      async (req: Request, res: Response) => {
+        const { eventTitle } = req.params;
 
         try {
           const event = await eventsCollection.findOne({ title: eventTitle });
           if (!event) {
-            return Response.status(404).json({ message: "Event not found" });
+            return res.status(404).json({ message: "Event not found" });
           }
 
           const organizer = await db
             .collection("users")
             .findOne({ _id: new ObjectId(event.organizerId) });
           if (!organizer) {
-            return Response.status(404).json({
+            return res.status(404).json({
               message: "Organizer not found",
             });
           }
@@ -155,20 +155,20 @@ client
           Response.json(eventDetails);
         } catch (error) {
           console.error("Error fetching event details:", error);
-          Response.status(500).json({ message: "Internal server error" });
+          res.status(500).json({ message: "Internal server error" });
         }
       },
     );
 
     app.post(
       "/api/join/:eventTitle",
-      async (Request: Request, Response: Response) => {
-        const { eventTitle } = Request.params;
-        const { userId } = Request.body;
+      async (req: Request, res: Response) => {
+        const { eventTitle } = req.params;
+        const { userId } = req.body;
 
         if (!userId) {
           console.error("Invalid or missing userId:", userId);
-          return Response.status(400).json({
+          return res.status(400).json({
             message: "Invalid or missing userId",
           });
         }
@@ -178,7 +178,7 @@ client
           const event = await eventsCollection.findOne({ title: eventTitle });
           if (!event) {
             console.error("Event not found:", eventTitle);
-            return Response.status(404).json({ message: "Event not found" });
+            return res.status(404).json({ message: "Event not found" });
           }
 
           const result = await usersCollection.updateOne(
@@ -188,28 +188,28 @@ client
           );
 
           if (result.modifiedCount === 0 && result.upsertedCount === 0) {
-            return Response.status(400).json({
+            return res.status(400).json({
               message: "Event already joined",
             });
           }
 
-          Response.status(200).json({
+          res.status(200).json({
             message: "Successfully joined the event!",
           });
         } catch (error) {
           console.error("Error joining event:", error);
-          Response.status(500).json({ message: "Internal server error" });
+          res.status(500).json({ message: "Internal server error" });
         }
       },
     );
 
     app.post(
       "/api/user/join-event",
-      async (Request: Request, Response: Response) => {
-        const { userId, eventId } = Request.body;
+      async (req: Request, res: Response) => {
+        const { userId, eventId } = req.body;
 
         if (!userId || !eventId) {
-          return Response.status(400).json({
+          return res.status(400).json({
             message: "User ID and Event ID are required",
           });
         }
@@ -224,24 +224,24 @@ client
           );
 
           if (result.modifiedCount === 0) {
-            return Response.status(404).json({ message: "User not found" });
+            return res.status(404).json({ message: "User not found" });
           }
 
-          Response.status(200).json({ message: "Event joined successfully" });
+          res.status(200).json({ message: "Event joined successfully" });
         } catch (error) {
           console.error("Failed to join event:", error);
-          Response.status(500).json({ message: "Internal server error" });
+          res.status(500).json({ message: "Internal server error" });
         }
       },
     );
 
     app.get(
       "/api/user/joined-events",
-      async (Request: Request, Response: Response) => {
-        const userId = Request.query.userId;
+      async (req: Request, res: Response) => {
+        const userId = req.query.userId;
 
         if (!userId) {
-          return Response.status(400).json({ message: "User ID is required" });
+          return res.status(400).json({ message: "User ID is required" });
         }
 
         try {
@@ -251,7 +251,7 @@ client
           const user = await usersCollection.findOne({ id: userId });
 
           if (!user) {
-            return Response.status(404).json({ message: "User not found" });
+            return res.status(404).json({ message: "User not found" });
           }
 
           const joinedEvents = await eventsCollection
@@ -262,21 +262,21 @@ client
             })
             .toArray();
 
-          Response.status(200).json(joinedEvents);
+          res.status(200).json(joinedEvents);
         } catch (error) {
           console.error("Failed to fetch joined events:", error);
-          Response.status(500).json({ message: "Internal server error" });
+          res.status(500).json({ message: "Internal server error" });
         }
       },
     );
 
     app.get(
       "/api/event/:eventId/attendees",
-      async (Request: Request, Response: Response) => {
-        const { eventId } = Request.params;
+      async (req: Request, res: Response) => {
+        const { eventId } = req.params;
 
         if (!ObjectId.isValid(eventId)) {
-          return Response.status(400).json({ message: "Invalid eventId" });
+          return res.status(400).json({ message: "Invalid eventId" });
         }
 
         try {
@@ -287,7 +287,7 @@ client
             _id: new ObjectId(eventId),
           });
           if (!event) {
-            return Response.status(404).json({ message: "Event not found" });
+            return res.status(404).json({ message: "Event not found" });
           }
 
           const attendees = await usersCollection
@@ -298,18 +298,18 @@ client
             .toArray();
 
           console.log("Attendees for event:", attendees);
-          Response.status(200).json(attendees);
+          res.status(200).json(attendees);
         } catch (error) {
           console.error("Error fetching attendees:", error);
-          Response.status(500).json({ message: "Internal server error" });
+          res.status(500).json({ message: "Internal server error" });
         }
       },
     );
 
     app.get(
       "/api/user/events/:userId",
-      async (Request: Request, Response: Response) => {
-        const { userId } = Request.params;
+      async (req: Request, res: Response) => {
+        const { userId } = req.params;
 
         try {
           const usersCollection = db.collection("users");
@@ -330,7 +330,7 @@ client
           console.error(
             `Error fetching user events: userId=${userId}, error=${error}`,
           );
-          Response.status(500).json({
+          res.status(500).json({
             message: "Failed to fetch user events. Please try again later.",
           });
         }
@@ -339,8 +339,8 @@ client
 
     app.get(
       "/api/user/events/:userId",
-      async (Request: Request, Response: Response) => {
-        const { userId } = Request.params;
+      async (req: Request, res: Response) => {
+        const { userId } = req.params;
 
         try {
           const usersCollection = db.collection("users");
@@ -359,16 +359,16 @@ client
           Response.json(events);
         } catch (error) {
           console.error("Error fetching user events:", error);
-          Response.status(500).json({ message: "Internal server error" });
+          res.status(500).json({ message: "Internal server error" });
         }
       },
     );
 
     app.put(
       "/api/event/name/:eventName",
-      async (Request: Request, Response: Response) => {
-        const { eventName } = Request.params;
-        const updatedEvent = Request.body;
+      async (req: Request, res: Response) => {
+        const { eventName } = req.params;
+        const updatedEvent = req.body;
 
         try {
           const result = await eventsCollection.updateOne(
@@ -377,23 +377,23 @@ client
           );
 
           if (result.modifiedCount === 0) {
-            return Response.status(404).json({
+            return res.status(404).json({
               message: "Event not found or no changes made",
             });
           }
 
-          Response.status(200).json({ message: "Event updated successfully" });
+          res.status(200).json({ message: "Event updated successfully" });
         } catch (error) {
           console.error("Error updating event:", error);
-          Response.status(500).json({ message: "Internal server error" });
+          res.status(500).json({ message: "Internal server error" });
         }
       },
     );
 
     app.delete(
       "/api/event/name/:eventName",
-      async (Request: Request, Response: Response) => {
-        const { eventName } = Request.params;
+      async (req: Request, res: Response) => {
+        const { eventName } = req.params;
         console.log("Attempting to delete event with name:", eventName);
 
         try {
@@ -401,19 +401,19 @@ client
           console.log("Delete result:", result);
 
           if (result.deletedCount === 0) {
-            return Response.status(404).json({ message: "Event not found" });
+            return res.status(404).json({ message: "Event not found" });
           }
 
-          Response.status(200).json({ message: "Event deleted successfully" });
+          res.status(200).json({ message: "Event deleted successfully" });
         } catch (error) {
           console.error("Error deleting event:", error);
-          Response.status(500).json({ message: "Internal server error" });
+          res.status(500).json({ message: "Internal server error" });
         }
       },
     );
 
-    app.get("/api/userinfo", async (Request: Request, Response: Response) => {
-      const { access_token, discovery_endpoint } = Request.cookies;
+    app.get("/api/userinfo", async (req: Request, res: Response) => {
+      const { access_token, discovery_endpoint } = req.cookies;
 
       if (access_token) {
         const configuration = await fetch(discovery_endpoint);
@@ -434,39 +434,39 @@ client
             picture: userinfo.picture,
             ...userinfo,
           };
-          return Response.status(200).json(user);
+          return res.status(200).json(user);
         }
-        return Response.status(userinfoRes.status).json(userinfo);
+        return res.status(userinfoRes.status).json(userinfo);
       }
 
-      Response.sendStatus(401);
+      res.sendStatus(401);
     });
 
-    app.post("/api/login", (Request: Request, Response: Response) => {
-      const { access_token, discovery_endpoint } = Request.body;
-      Response.cookie("access_token", access_token);
-      Response.cookie("discovery_endpoint", discovery_endpoint);
-      Response.sendStatus(201);
+    app.post("/api/login", (req: Request, res: Response) => {
+      const { access_token, discovery_endpoint } = req.body;
+      res.cookie("access_token", access_token);
+      res.cookie("discovery_endpoint", discovery_endpoint);
+      res.sendStatus(201);
     });
 
     app.get(
       "/api/login/end_session",
-      async (Request: Request, Response: Response) => {
-        Response.clearCookie("access_token");
-        Response.clearCookie("discovery_endpoint");
-        Response.redirect("/");
+      async (req: Request, res: Response) => {
+        res.clearCookie("access_token");
+        res.clearCookie("discovery_endpoint");
+        res.redirect("/");
       },
     );
 
     app.get(
       "/api/login/entraid/start",
-      async (Request: Request, Response: Response) => {
+      async (req: Request, res: Response) => {
         const discovery_endpoint =
           "https://login.microsoftonline.com/organizations/v2.0/.well-known/openid-configuration";
         const client_id = ENTRAID_CLIENT_ID || "";
         if (!client_id) {
           console.error("ENTRAID_CLIENT_ID is not defined");
-          return Response.status(500).json({
+          return res.status(500).json({
             error: "Server misconfiguration",
           });
         }
@@ -477,7 +477,7 @@ client
           response_type: "code",
           scope: "openid profile email",
           client_id: client_id,
-          redirect_uri: `${Request.protocol}://${Request.headers.host}/api/login/entraid/callback`,
+          redirect_uri: `${req.protocol}://${req.headers.host}/api/login/entraid/callback`,
         };
 
         const authorization_url = `${authorization_endpoint}?${new URLSearchParams(parameters)}`;
@@ -487,13 +487,13 @@ client
 
     app.get(
       "/api/login/linkedin/start",
-      async (Request: Request, Response: Response) => {
+      async (req: Request, res: Response) => {
         const discovery_endpoint =
           "https://www.linkedin.com/oauth/.well-known/openid-configuration";
         const client_id = LINKEDIN_CLIENT_ID || "";
         if (!client_id) {
           console.error("LINKEDIN_CLIENT_ID is not defined");
-          return Response.status(500).json({
+          return res.status(500).json({
             error: "Server misconfiguration",
           });
         }
@@ -504,7 +504,7 @@ client
           response_type: "code",
           scope: "openid profile email",
           client_id: client_id,
-          redirect_uri: `${Request.protocol}://${Request.headers.host}/api/login/linkedin/callback`,
+          redirect_uri: `${req.protocol}://${req.headers.host}/api/login/linkedin/callback`,
         };
 
         const authorization_url = `${authorization_endpoint}?${new URLSearchParams(parameters)}`;
@@ -514,13 +514,13 @@ client
 
     app.get(
       "/api/login/google/start",
-      async (Request: Request, Response: Response) => {
+      async (req: Request, res: Response) => {
         const discovery_endpoint =
           "https://accounts.google.com/.well-known/openid-configuration";
         const client_id = GOOGLE_CLIENT_ID || "";
         if (!client_id) {
           console.error("GOOGLE_CLIENT_ID is not defined");
-          return Response.status(500).json({
+          return res.status(500).json({
             error: "Server misconfiguration",
           });
         }
@@ -531,7 +531,7 @@ client
           response_type: "code",
           scope: "openid profile email",
           client_id: client_id,
-          redirect_uri: `${Request.protocol}://${Request.headers.host}/api/login/google/callback`,
+          redirect_uri: `${req.protocol}://${req.headers.host}/api/login/google/callback`,
         };
 
         const authorization_url = `${authorization_endpoint}?${new URLSearchParams(parameters)}`;
@@ -541,8 +541,8 @@ client
 
     app.get(
       "/api/login/google/callback",
-      async (Request: Request, Response: Response) => {
-        const { code } = Request.query;
+      async (req: Request, res: Response) => {
+        const { code } = req.query;
         const discovery_endpoint =
           "https://accounts.google.com/.well-known/openid-configuration";
         const configuration = await fetch(discovery_endpoint);
@@ -557,7 +557,7 @@ client
             client_id: GOOGLE_CLIENT_ID!,
             client_secret: GOOGLE_CLIENT_SECRET!,
             code: code as string,
-            redirect_uri: `${Request.protocol}://${Request.headers.host}/api/login/google/callback`,
+            redirect_uri: `${req.protocol}://${req.headers.host}/api/login/google/callback`,
           }),
         });
 
@@ -587,21 +587,21 @@ client
               { upsert: true },
             );
 
-            Response.cookie("access_token", access_token);
-            Response.cookie("discovery_endpoint", discovery_endpoint);
+            res.cookie("access_token", access_token);
+            res.cookie("discovery_endpoint", discovery_endpoint);
             return Response.redirect("/Registered");
           } else {
             console.error(
               "Google userinfo fetch failed:",
               await userinfoRes.text(),
             );
-            return Response.status(500).json({
+            return res.status(500).json({
               message: "Failed to fetch Google user info.",
             });
           }
         } else {
           console.error("Google token fetch failed:", await tokenResult.text());
-          return Response.status(500).json({
+          return res.status(500).json({
             message: "Failed to complete Google login.",
           });
         }
@@ -610,8 +610,8 @@ client
 
     app.get(
       "/api/login/linkedin/callback",
-      async (Request: Request, Response: Response) => {
-        const { code } = Request.query;
+      async (req: Request, res: Response) => {
+        const { code } = req.query;
         const discovery_endpoint =
           "https://www.linkedin.com/oauth/.well-known/openid-configuration";
         const configuration = await fetch(discovery_endpoint);
@@ -625,14 +625,14 @@ client
             client_id: LINKEDIN_CLIENT_ID!,
             client_secret: LINKEDIN_CLIENT_SECRET!,
             code: code as string,
-            redirect_uri: `${Request.protocol}://${Request.headers.host}/api/login/linkedin/callback`,
+            redirect_uri: `${req.protocol}://${req.headers.host}/api/login/linkedin/callback`,
           }),
         });
 
         if (tokenResult.ok) {
           const { access_token } = await tokenResult.json();
-          Response.cookie("access_token", access_token);
-          Response.cookie("discovery_endpoint", discovery_endpoint);
+          res.cookie("access_token", access_token);
+          res.cookie("discovery_endpoint", discovery_endpoint);
 
           return Response.redirect("/Registered");
         } else {
@@ -640,7 +640,7 @@ client
             "Linkedin token fetch failed:",
             await tokenResult.text(),
           );
-          return Response.status(500).json({
+          return res.status(500).json({
             message: "Failed to complete Linkedin login.",
           });
         }
@@ -649,8 +649,8 @@ client
 
     app.get(
       "/api/login/entraid/callback",
-      async (Request: Request, Response: Response) => {
-        const { code } = Request.query;
+      async (req: Request, res: Response) => {
+        const { code } = req.query;
         const discovery_endpoint =
           "https://login.microsoftonline.com/organizations/v2.0/.well-known/openid-configuration";
         const configuration = await fetch(discovery_endpoint);
@@ -664,14 +664,14 @@ client
             client_id: ENTRAID_CLIENT_ID!,
             client_secret: ENTRAID_CLIENT_SECRET!,
             code: code as string,
-            redirect_uri: `${Request.protocol}://${Request.headers.host}/api/login/entraid/callback`,
+            redirect_uri: `${req.protocol}://${req.headers.host}/api/login/entraid/callback`,
           }),
         });
 
         if (tokenResult.ok) {
           const { access_token } = await tokenResult.json();
-          Response.cookie("access_token", access_token);
-          Response.cookie("discovery_endpoint", discovery_endpoint);
+          res.cookie("access_token", access_token);
+          res.cookie("discovery_endpoint", discovery_endpoint);
 
           return Response.redirect("/Registered");
         } else {
@@ -679,7 +679,7 @@ client
             "Entraid token fetch failed:",
             await tokenResult.text(),
           );
-          return Response.status(500).json({
+          return res.status(500).json({
             message: "Failed to complete Entraid login.",
           });
         }
@@ -688,31 +688,31 @@ client
 
     app.get(
       "/api/event/id/:id",
-      async (Request: Request, Response: Response) => {
-        const { id } = Request.params;
+      async (req: Request, res: Response) => {
+        const { id } = req.params;
         try {
           const event = await eventsCollection.findOne({
             _id: new ObjectId(id),
           });
           if (!event) {
-            return Response.status(404).json({ message: "Event not found" });
+            return res.status(404).json({ message: "Event not found" });
           }
-          Response.json(event);
+          res.json(event);
         } catch (error) {
           console.error("Error fetching event:", error);
-          Response.status(500).json({ message: "Internal server error" });
+          res.status(500).json({ message: "Internal server error" });
         }
       },
     );
 
     app.put(
       "/api/event/id/:id",
-      async (Request: Request, Response: Response) => {
-        const { id } = Request.params;
-        const updatedEvent = Request.body;
+      async (req: Request, res: Response) => {
+        const { id } = req.params;
+        const updatedEvent = req.body;
 
         if (!ObjectId.isValid(id)) {
-          return Response.status(400).json({ message: "Invalid event ID" });
+          return res.status(400).json({ message: "Invalid event ID" });
         }
 
         try {
@@ -723,26 +723,26 @@ client
             { $set: updateData },
           );
           if (result.modifiedCount === 0) {
-            return Response.status(404).json({
+            return res.status(404).json({
               message: "Event not found or no changes made",
             });
           }
-          Response.status(200).json({ message: "Event updated successfully" });
+          res.status(200).json({ message: "Event updated successfully" });
         } catch (error) {
           console.error("Error updating event:", error);
-          Response.status(500).json({ message: "Internal server error" });
+          res.status(500).json({ message: "Internal server error" });
         }
       },
     );
 
     app.delete(
       "/api/event/id/:id",
-      async (Request: Request, Response: Response) => {
-        const { id } = Request.params;
+      async (req: Request, res: Response) => {
+        const { id } = req.params;
 
         try {
           if (!ObjectId.isValid(id)) {
-            return Response.status(400).json({ message: "Invalid event ID" });
+            return res.status(400).json({ message: "Invalid event ID" });
           }
 
           const result = await eventsCollection.deleteOne({
@@ -751,13 +751,13 @@ client
           console.log("Delete result:", result);
 
           if (result.deletedCount === 0) {
-            return Response.status(404).json({ message: "Event not found" });
+            return res.status(404).json({ message: "Event not found" });
           }
 
-          Response.status(200).json({ message: "Event deleted successfully" });
+          res.status(200).json({ message: "Event deleted successfully" });
         } catch (error) {
           console.error("Error deleting event:", error);
-          Response.status(500).json({ message: "Internal server error" });
+          res.status(500).json({ message: "Internal server error" });
         }
       },
     );
