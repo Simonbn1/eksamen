@@ -144,3 +144,10 @@ body {
 .footer a:hover {
   color: #c0392b;
 }
+
+.loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+}

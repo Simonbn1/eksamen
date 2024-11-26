@@ -108,3 +108,10 @@ body {
   margin-bottom: 15px;
   color: #333;
 }
+
+.loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}

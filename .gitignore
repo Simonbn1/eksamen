@@ -1,5 +1,4 @@
 /.idea/
 node_modules/
 .env
-/client/dist/
 /server/dist/

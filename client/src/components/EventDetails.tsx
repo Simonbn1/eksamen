@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { Circles } from "react-loader-spinner";
 import "./style/EventDetails.css";
 
 interface EventDetailsProps {
@@ -16,6 +17,7 @@ const EventDetails: React.FC = () => {
   const [eventDetails, setEventDetails] = useState<EventDetailsProps | null>(
     null,
   );
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchEventDetails = async () => {
@@ -30,11 +32,21 @@ const EventDetails: React.FC = () => {
         setEventDetails(data);
       } catch (error) {
         console.error("Error fetching event details:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchEventDetails();
   }, [eventTitle]);
+
+  if (loading) {
+    return (
+      <div className="loader-container">
+        <Circles height="80" width="80" color="#4fa94d" ariaLabel="loading" />
+      </div>
+    );
+  }
 
   if (!eventDetails) {
     return <div>Loading...</div>;

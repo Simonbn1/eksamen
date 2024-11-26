@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Circles } from "react-loader-spinner";
 import "./style/Profile.css";
 
 interface Event {
@@ -15,6 +16,7 @@ const Profile: React.FC = () => {
   const [user, setUser] = useState<any>(null);
   const [joinedEvents, setJoinedEvents] = useState<Event[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,6 +31,8 @@ const Profile: React.FC = () => {
         }
       } catch (err) {
         setError("Network error. Please try again.");
+      } finally {
+        setLoading(false);
       }
     }
 
@@ -60,6 +64,14 @@ const Profile: React.FC = () => {
       fetchJoinedEvents();
     }
   }, [user]);
+
+  if (loading) {
+    return (
+      <div className="loader-container">
+        <Circles height="80" width="80" color="#4fa94d" ariaLabel="loading" />
+      </div>
+    );
+  }
 
   if (!user) {
     return <div>Loading...</div>;

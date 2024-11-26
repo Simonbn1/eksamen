@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useJoinedEvents } from "./JoinedEventsContext";
 import "./style/Registered.css";
+import { Circles } from "react-loader-spinner";
 
 interface Event {
   id: string;
@@ -37,6 +38,7 @@ const Registered: React.FC = () => {
     place: "",
     search: "",
   });
+  const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
   const { addJoinedEvent } = useJoinedEvents();
 
@@ -78,6 +80,8 @@ const Registered: React.FC = () => {
         );
       } catch (error) {
         console.error("Failed to fetch events:", error);
+      } finally {
+        setLoading(false);
       }
     }
     fetchEvents();
@@ -143,6 +147,14 @@ const Registered: React.FC = () => {
 
   const handleViewDetails = (eventTitle: string) =>
     navigate(`/event/${eventTitle}`);
+
+  if (loading) {
+    return (
+      <div className="loader-container">
+        <Circles height="80" width="80" color="#4fa94d" ariaLabel="loading" />
+      </div>
+    );
+  }
 
   if (!user) {
     return (

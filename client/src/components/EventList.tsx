@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Circles } from "react-loader-spinner";
 import "./style/EventList.css";
 
 interface Event {
@@ -12,6 +13,7 @@ interface Event {
 
 const EventList: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,11 +27,21 @@ const EventList: React.FC = () => {
         setEvents(data);
       } catch (error) {
         console.error("Failed to fetch events:", error);
+      } finally {
+        setLoading(false);
       }
     }
 
     fetchEvents();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="loader-container">
+        <Circles height="80" width="80" color="#4fa94d" ariaLabel="loading" />
+      </div>
+    );
+  }
 
   return (
     <div className="EventList-container">

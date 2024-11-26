@@ -131,43 +131,37 @@ client.connect().then(() => {
     }
   });
 
-  app.get(
-    "/api/event/:eventTitle",
-    async (req: Request, res: Response): Promise<void> => {
-      const { eventTitle } = req.params;
+  app.get("/api/event/:eventTitle", async (req, res) => {
+    const { eventTitle } = req.params;
 
-      try {
-        const event = await eventsCollection.findOne({ title: eventTitle });
-        if (!event) {
-          res.status(404).json({ message: "Event not found" });
-          return;
-        }
-
-        const organizer = await db
-          .collection("users")
-          .findOne({ _id: new ObjectId(event.organizerId) });
-
-        if (!organizer) {
-          res.status(404).json({ message: "Organizer not found" });
-          return;
-        }
-
-        const eventDetails = {
-          title: event.title,
-          description: event.description,
-          time: event.date,
-          place: event.place,
-          organizerName: organizer.name,
-          organizerPhoto: organizer.photo,
-        };
-
-        res.json(eventDetails);
-      } catch (error) {
-        console.error("Error fetching event details:", error);
-        res.status(500).json({ message: "Internal server error" });
+    try {
+      const event = await eventsCollection.findOne({ title: eventTitle });
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
       }
-    },
-  );
+
+      const organizer = await db
+        .collection("users")
+        .findOne({ _id: new ObjectId(event.organizerId) });
+      if (!organizer) {
+        return res.status(404).json({ message: "Organizer not found" });
+      }
+
+      const eventDetails = {
+        title: event.title,
+        description: event.description,
+        time: event.date,
+        place: event.place,
+        organizerName: organizer.name,
+        organizerPhoto: organizer.photo,
+      };
+
+      res.json(eventDetails);
+    } catch (error) {
+      console.error("Error fetching event details:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
 
   app.post(
     "/api/join/:eventTitle",
@@ -439,6 +433,34 @@ client.connect().then(() => {
       }
     },
   );
+
+  app.post("/api/login-admin", async (req, res) => {
+    const { username, password } = req.body;
+
+    try {
+      const usersCollection = client.db("eventdb").collection("users");
+      const user = await usersCollection.findOne({ username });
+      if (!user) {
+        console.log("User not found:", username);
+        return res
+          .status(401)
+          .json({ message: "Invalid username or password" });
+      }
+
+      if (password !== user.password) {
+        console.log("Invalid password for user:", username);
+        return res
+          .status(401)
+          .json({ message: "Invalid username or password" });
+      }
+
+      // Set a cookie or generate a token for the session
+      res.status(200).json({ message: "Login successful" });
+    } catch (error) {
+      console.error("Error during login:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
 
   app.get(
     "/api/userinfo",

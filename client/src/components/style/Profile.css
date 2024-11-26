@@ -110,3 +110,10 @@ body {
   background-color: #c0392b;
   transform: scale(1.05);
 }
+
+.loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}

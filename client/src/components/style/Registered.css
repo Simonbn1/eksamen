@@ -248,3 +248,10 @@ body {
 .profile-button:hover {
   background-color: #c0392b;
 }
+
+.loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
