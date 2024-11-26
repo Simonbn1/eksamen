@@ -13,8 +13,13 @@ const LINKEDIN_CLIENT_SECRET = process.env.LINKEDIN_CLIENT_SECRET;
 const ENTRAID_CLIENT_ID = process.env.ENTRAID_CLIENT_ID;
 const ENTRAID_CLIENT_SECRET = process.env.ENTRAID_CLIENT_SECRET;
 
+
 const app = express();
-const port = process.env.PORT || 3000;
+const port: number = parseInt(process.env.PORT || '3000', 10);
+// Listen on the provided port from Heroku or the default for local testing
+app.listen(port, '0.0.0.0', () => {
+    console.log(`Server is running on port ${port}`);
+});
 app.use(express.static(path.join(__dirname, "../client/dist")));
 
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
