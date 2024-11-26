@@ -14,6 +14,10 @@ const ENTRAID_CLIENT_SECRET = process.env.ENTRAID_CLIENT_SECRET;
 
 const app = express();
 const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
+});
+
 
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use(express.json());
@@ -26,6 +30,11 @@ client.connect().then(() => {
 
   const db = client.db("eventdb");
   const eventsCollection = db.collection("eventdb");
+
+  app.get("/", (req: Request, res: Response) => {
+    res.status(200).send("Welcome to the Event App API!");
+  });
+
 
   app.get("/api/event", async (req: Request, res: Response): Promise<void> => {
     try {
