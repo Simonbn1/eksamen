@@ -9,7 +9,7 @@
     "vite": "^6.0.0"
   },
   "scripts": {
-    "start": "node server/server.js",
+    "start": "node server/server.ts",
     "build": "cd client && npm run build",
     "dev": "concurrently npm:dev:server npm:dev:client",
     "dev:client": "cd client && npm run dev",
