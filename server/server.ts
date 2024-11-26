@@ -3,6 +3,7 @@ import { MongoClient, ObjectId } from "mongodb";
 import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import path from "path";
 
 dotenv.config();
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
@@ -867,9 +868,24 @@ client.connect().then(() => {
       }
     },
   );
-  app.get("/", (req: Request, res: Response) => {
-    res.send("Hello, world! Your server is up and running.");
-  });
+
+    const staticPath = path.join(__dirname, "../public"); // Update path accordingly
+    app.use(express.static(staticPath));
+
+    app.get("/api/events", async (req, res) => {
+        try {
+            const events = await eventsCollection.find({}).toArray();
+            res.status(200).json(events);
+        } catch (error) {
+            console.error("Error fetching events:", error);
+            res.status(500).json({ message: "Internal server error" });
+        }
+    });
+
+    app.get("*", (req, res) => {
+        res.sendFile(path.join(staticPath, "index.html"));
+    });
+
 
   app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
