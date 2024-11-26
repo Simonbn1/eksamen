@@ -17,14 +17,13 @@ const app = express();
 const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
 
 fetch(`${apiBaseUrl}/event`)
-    .then(response => response.json())
-    .then(data => {
-        // handle your data
-    });
+  .then((response) => response.json())
+  .then((data) => {
+    // handle your data
+  });
 
-app.use(cors({ origin: process.env.CLIENT_URL || '*', credentials: true }));
+app.use(cors({ origin: process.env.CLIENT_URL || "*", credentials: true }));
 app.use(cors({ origin: true, credentials: true }));
-
 
 app.use(express.static(path.join(__dirname, "../client/dist")));
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
