@@ -29,7 +29,6 @@ client.connect().then(() => {
   const db = client.db("eventdb");
   const eventsCollection = db.collection("eventdb");
 
-
   app.get("/api/event", async (req: Request, res: Response): Promise<void> => {
     try {
       const { category, place, startTime, endTime, search } = req.query;
@@ -128,23 +127,25 @@ client.connect().then(() => {
     }
   });
 
-  app.get("/api/event/:eventTitle", async (req: Request<{ eventTitle: string }>, res: Response) => {
-    const { eventTitle } = req.params;
+  app.get(
+    "/api/event/:eventTitle",
+    async (req: Request<{ eventTitle: string }>, res: Response) => {
+      const { eventTitle } = req.params;
 
-    try {
-      const eventsCollection = client.db("eventdb").collection("events");
-      const event = await eventsCollection.findOne({ title: eventTitle });
-      if (!event) {
-        return res.status(404).json({ message: "Event not found" });
+      try {
+        const eventsCollection = client.db("eventdb").collection("events");
+        const event = await eventsCollection.findOne({ title: eventTitle });
+        if (!event) {
+          return res.status(404).json({ message: "Event not found" });
+        }
+
+        res.status(200).json(event);
+      } catch (error) {
+        console.error("Error fetching event details:", error);
+        res.status(500).json({ message: "Internal server error" });
       }
-
-      res.status(200).json(event);
-    } catch (error) {
-      console.error("Error fetching event details:", error);
-      res.status(500).json({ message: "Internal server error" });
-    }
-  });
-
+    },
+  );
 
   app.post(
     "/api/join/:eventTitle",
@@ -425,12 +426,16 @@ client.connect().then(() => {
       const user = await usersCollection.findOne({ username });
       if (!user) {
         console.log("User not found:", username);
-        return res.status(401).json({ message: "Invalid username or password" });
+        return res
+          .status(401)
+          .json({ message: "Invalid username or password" });
       }
 
       if (password !== user.password) {
         console.log("Invalid password for user:", username);
-        return res.status(401).json({ message: "Invalid username or password" });
+        return res
+          .status(401)
+          .json({ message: "Invalid username or password" });
       }
 
       res.status(200).json({ message: "Login successful" });
