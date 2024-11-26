@@ -14,16 +14,7 @@ const ENTRAID_CLIENT_ID = process.env.ENTRAID_CLIENT_ID;
 const ENTRAID_CLIENT_SECRET = process.env.ENTRAID_CLIENT_SECRET;
 
 const app = express();
-const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
-
-fetch(`${apiBaseUrl}/event`)
-  .then((response) => response.json())
-  .then((data) => {
-    // handle your data
-  });
-
-app.use(cors({ origin: process.env.CLIENT_URL || "*", credentials: true }));
-app.use(cors({ origin: true, credentials: true }));
+const port = parseInt(process.env.PORT || "3000", 10);
 
 app.use(express.static(path.join(__dirname, "../client/dist")));
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
@@ -895,6 +886,10 @@ client.connect().then(() => {
   });
 
   app.use(express.static(path.join(__dirname, "../client/dist")));
+
+  app.listen(port, "0.0.0.0", () => {
+    console.log(`Server is running on port ${port}`);
+  });
 
   app.get("*", (req, res) => {
     res.sendFile(path.join(__dirname, "../client/dist/index.html"));
