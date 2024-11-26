@@ -15,6 +15,7 @@ const ENTRAID_CLIENT_SECRET = process.env.ENTRAID_CLIENT_SECRET;
 
 const app = express();
 const port = process.env.PORT || 3000;
+app.use(express.static("../client/dist"));
 
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use(express.json());
@@ -882,7 +883,15 @@ client.connect().then(() => {
     }
   });
 
-  app.get("*", (req, res) => {
+    app.use((req, res, next) => {
+        if (req.method === "GET" && !req.path.startsWith("/api")) {
+            res.sendFile(path.resolve("../client/dist/index.html"));
+        } else {
+            next();
+        }
+    })
+
+    app.get("*", (req, res) => {
     res.sendFile(path.join(staticPath, "index.html"));
   });
 
