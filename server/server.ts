@@ -17,7 +17,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.static(path.join(__dirname, "../client/dist")));
-app.use(cors({ origin: process.env.CLIENT_URL , credentials: true }));
+app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 
@@ -29,15 +29,15 @@ client.connect().then(() => {
   const db = client.db("eventdb");
   const eventsCollection = db.collection("eventdb");
 
-    app.get("/api/event", async (req: Request, res: Response) => {
-        try {
-            const events = await eventsCollection.find().toArray();
-            res.status(200).json(events);
-        } catch (error) {
-            console.error("Error fetching events:", error);
-            res.status(500).json({ message: "Internal server error" });
-        }
-    });
+  app.get("/api/event", async (req: Request, res: Response) => {
+    try {
+      const events = await eventsCollection.find().toArray();
+      res.status(200).json(events);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
 
   app.get(
     "/api/events/:eventId/users",
