@@ -19,16 +19,21 @@ const EventList: React.FC = () => {
     async function fetchEvents() {
       try {
         const response = await fetch(`${apiBaseUrl}/event`);
+        console.log("Response Status:", response.status);
+        console.log("Response Headers:", response.headers);
+        const text = await response.text(); // Log the raw response
+        console.log("Response Text:", text);
+
         if (!response.ok) {
-          throw new Error("Failed to fetch events");
+          throw new Error(`Failed to fetch events. Status code: ${response.status}`);
         }
-        return await response.json();
+
+        return JSON.parse(text); // Parse only if the response is expected to be JSON
       } catch (error) {
         console.error("Error fetching events:", error);
         throw error;
       }
     }
-
     fetchEvents();
   }, []);
 

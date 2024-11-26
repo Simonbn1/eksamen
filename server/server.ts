@@ -40,43 +40,15 @@ client.connect().then(() => {
     res.send("Hello, World!");
   });
 
-  app.get("/api/event", async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { category, place, startTime, endTime, search } = req.query;
-      const query: any = {};
-
-      if (category) query.category = category;
-      if (place) query.place = place;
-      if (startTime || endTime) {
-        query.date = {};
-        if (startTime) query.date.$gte = new Date(startTime as string);
-        if (endTime) query.date.$lte = new Date(endTime as string);
-      }
-      if (search) query.title = { $regex: search, $options: "i" };
-
-      const eventsCollection = client.db("eventdb").collection("eventdb");
-      const usersCollection = client.db("eventdb").collection("users");
-
-      const events = await eventsCollection.find(query).toArray();
-
-      const eventsWithAttendeesCount = await Promise.all(
-        events.map(async (event) => {
-          const attendeeCount = await usersCollection.countDocuments({
-            joinedEvents: event._id.toString(),
-          });
-          return {
-            ...event,
-            attendeesCount: attendeeCount,
-          };
-        }),
-      );
-
-      res.status(200).json(eventsWithAttendeesCount);
-    } catch (error) {
-      console.error("Error fetching events:", error);
-      res.status(500).json({ message: "Internal server error" });
-    }
-  });
+    app.get("/api/event", async (req: Request, res: Response): Promise<void> => {
+        try {
+            const events = await eventsCollection.find().toArray();
+            res.status(200).json(events);
+        } catch (error) {
+            console.error("Error fetching events:", error);
+            res.status(500).json({ message: "Internal server error" });
+        }
+    });
 
   app.get(
     "/api/events/:eventId/users",
