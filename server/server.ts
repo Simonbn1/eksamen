@@ -869,23 +869,22 @@ client.connect().then(() => {
     },
   );
 
-    const staticPath = path.join(__dirname, "../public"); // Update path accordingly
-    app.use(express.static(staticPath));
+  const staticPath = path.join(__dirname, "../public"); // Update path accordingly
+  app.use(express.static(staticPath));
 
-    app.get("/api/events", async (req, res) => {
-        try {
-            const events = await eventsCollection.find({}).toArray();
-            res.status(200).json(events);
-        } catch (error) {
-            console.error("Error fetching events:", error);
-            res.status(500).json({ message: "Internal server error" });
-        }
-    });
+  app.get("/api/events", async (req, res) => {
+    try {
+      const events = await eventsCollection.find({}).toArray();
+      res.status(200).json(events);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
 
-    app.get("*", (req, res) => {
-        res.sendFile(path.join(staticPath, "index.html"));
-    });
-
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(staticPath, "index.html"));
+  });
 
   app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
