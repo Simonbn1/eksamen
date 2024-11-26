@@ -13,19 +13,18 @@ interface Event {
 const EventList: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const navigate = useNavigate();
-  const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || "";
 
   useEffect(() => {
     async function fetchEvents() {
       try {
-        const response = await fetch(`${apiBaseUrl}/event`);
+        const response = await fetch("http://localhost:3000/api/event");
         if (!response.ok) {
-          throw new Error("Failed to fetch events");
+          throw new Error(`HTTP error! Status: ${response.status}`);
         }
-        return await response.json();
+        const data = await response.json();
+        setEvents(data);
       } catch (error) {
-        console.error("Error fetching events:", error);
-        throw error;
+        console.error("Failed to fetch events:", error);
       }
     }
 
