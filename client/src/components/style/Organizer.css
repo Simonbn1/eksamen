@@ -1,4 +1,3 @@
-/* Organizer.css */
 body {
   font-family: "Arial", sans-serif;
   margin: 0;
@@ -38,7 +37,6 @@ body {
   color: #e74c3c;
 }
 
-/* Navigation buttons */
 .button-group {
   grid-area: nav;
   display: flex;
@@ -69,7 +67,6 @@ body {
   font-weight: bold;
 }
 
-/* Back home button */
 .org-back-home-button {
   margin-left: auto;
   background-color: #555;
@@ -89,7 +86,6 @@ body {
   transform: scale(1.05);
 }
 
-/* Content areas */
 .content {
   grid-area: content;
 }

@@ -1,4 +1,3 @@
-/* Registered.css */
 body {
   font-family: "Arial", sans-serif;
   margin: 0;
@@ -27,7 +26,6 @@ body {
   grid-template-columns: 1fr 3fr;
 }
 
-/* Header styling */
 .header {
   grid-area: header;
   background-color: #000;
@@ -56,7 +54,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 15px; /* Space between elements */
+  gap: 15px;
 }
 
 .sidebar img {
@@ -101,7 +99,6 @@ body {
   transform: scale(1.05);
 }
 
-/* Content styling */
 .content {
   grid-area: content;
   background-color: #fff;
@@ -116,7 +113,6 @@ body {
   color: #333;
 }
 
-/* Filter section */
 .filters {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -139,7 +135,6 @@ body {
   box-shadow: 0 0 5px rgba(231, 76, 60, 0.5);
 }
 
-/* Event list styling */
 .event-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -156,7 +151,7 @@ body {
   transition:
     transform 0.2s,
     box-shadow 0.2s;
-  min-width: 250px; /* Ensure minimum width */
+  min-width: 250px;
 }
 
 .event-card:hover {
@@ -194,7 +189,6 @@ body {
   transform: scale(1.05);
 }
 
-/* Login section */
 .login-links {
   text-align: center;
   margin-bottom: 20px;
@@ -238,7 +232,6 @@ body {
   transform: scale(1.05);
 }
 
-/* Profile button */
 .profile-button {
   display: block;
   margin: 20px auto;

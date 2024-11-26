@@ -85,10 +85,9 @@ const Home: React.FC = () => {
         </div>
       )}
 
-      {/* Footer */}
       <footer className="footer">
         <p>
-          &copy; 2024 GymHub. All rights reserved. | <a href="#">Contact Us</a>
+          &copy; 2024 GymHub. All rights reserved. | <a href="#">Kontakt oss</a>
         </p>
       </footer>
     </div>

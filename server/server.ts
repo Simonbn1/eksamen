@@ -47,10 +47,8 @@ client
         const eventsCollection = client.db("eventdb").collection("eventdb");
         const usersCollection = client.db("eventdb").collection("users");
 
-        // Fetch all events
         const events = await eventsCollection.find(query).toArray();
 
-        // Attach attendees count to each event
         const eventsWithAttendeesCount = await Promise.all(
           events.map(async (event) => {
             const attendeeCount = await usersCollection.countDocuments({
@@ -159,7 +157,7 @@ client
       const { userId } = req.body;
 
       if (!userId) {
-        console.error("Invalid or missing userId:", userId); // Debugging log
+        console.error("Invalid or missing userId:", userId);
         return res.status(400).json({ message: "Invalid or missing userId" });
       }
 
@@ -167,18 +165,16 @@ client
         const usersCollection = db.collection("users");
         const eventsCollection = db.collection("eventdb");
 
-        // Check if the event exists
         const event = await eventsCollection.findOne({ title: eventTitle });
         if (!event) {
           console.error("Event not found:", eventTitle); // Debugging log
           return res.status(404).json({ message: "Event not found" });
         }
 
-        // Add the event to the user's joinedEvents
         const result = await usersCollection.updateOne(
-          { _id: userId }, // Use the string `userId` directly
-          { $addToSet: { joinedEvents: event._id } }, // Add event._id to joinedEvents array
-          { upsert: true }, // Create the user if it doesn't exist
+          { _id: userId },
+          { $addToSet: { joinedEvents: event._id } },
+          { upsert: true },
         );
 
         if (result.modifiedCount === 0 && result.upsertedCount === 0) {
@@ -261,14 +257,12 @@ client
         const usersCollection = client.db("eventdb").collection("users");
         const eventsCollection = client.db("eventdb").collection("eventdb");
 
-        // Fetch the user by ID
         const user = await usersCollection.findOne({ id: userId });
 
         if (!user) {
           return res.status(404).json({ message: "User not found" });
         }
 
-        // Fetch events based on joined event IDs
         const joinedEvents = await eventsCollection
           .find({
             _id: {
@@ -324,7 +318,6 @@ client
         const usersCollection = db.collection("users");
         const eventsCollection = db.collection("eventdb");
 
-        // Find user and their joined events
         const user = await usersCollection.findOne({
           _id: new ObjectId(userId),
         });
@@ -332,7 +325,6 @@ client
           return res.json([]); // Return empty if no joined events
         }
 
-        // Fetch events by IDs
         const events = await eventsCollection
           .find({ _id: { $in: user.joinedEvents } })
           .toArray();
@@ -358,7 +350,7 @@ client
           _id: new ObjectId(userId),
         });
         if (!user || !user.joinedEvents) {
-          return res.json([]); // Return empty if no joined events
+          return res.json([]);
         }
 
         const events = await eventsCollection
@@ -428,7 +420,7 @@ client
 
         const userinfo = await userinfoRes.json();
         if (userinfoRes.ok) {
-          // Map `sub` to `id` for consistency with frontend expectations
+
           const user = {
             id: userinfo.sub, // Map sub to id
             name: userinfo.name,
@@ -562,7 +554,6 @@ client
 
           const usersCollection = client.db("eventdb").collection("users");
 
-          // Upsert user information in the database
           await usersCollection.updateOne(
             { id: user.id },
             { $set: user },

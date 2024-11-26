@@ -35,12 +35,6 @@ const Organizer: React.FC = () => {
       <div>
         {selectedSection === "add" && (
           <div className="form-group title-group">
-            {/*<button*/}
-            {/*    className={`submit-button ${selectedSection === "add" ? "active" : ""}`}*/}
-            {/*    onClick={() => setSelectedSection("add")}*/}
-            {/*    >*/}
-            {/*        Add Event*/}
-            {/*    </button>*/}
             <AddEvent />
           </div>
         )}

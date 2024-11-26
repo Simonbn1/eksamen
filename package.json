@@ -6,7 +6,7 @@
     "concurrently": "^9.1.0",
     "husky": "^9.1.6",
     "prettier": "^3.3.3",
-    "vite": "^5.4.10"
+    "vite": "^6.0.0"
   },
   "scripts": {
     "build": "cd client && npm run build",

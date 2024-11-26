@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 interface Event {
   id: string;
@@ -11,7 +11,6 @@ interface Event {
 }
 
 const YourEvents: React.FC = () => {
-  const navigate = useNavigate();
   const [events, setEvents] = useState<Event[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [attendeeCount, setAttendeeCount] = useState<number | null>(null);
@@ -74,7 +73,6 @@ const YourEvents: React.FC = () => {
         throw new Error("Failed to delete the event");
       }
 
-      // Filter out the deleted event in the front-end state
       setEvents((prevEvents) => prevEvents.filter((event) => event.id !== id));
 
       console.log(`Event with id ${id} deleted successfully.`);
