@@ -17,8 +17,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.static(path.join(__dirname, "../client/dist")));
-
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+app.use(cors({ origin: process.env.CLIENT_URL , credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 
@@ -30,43 +29,15 @@ client.connect().then(() => {
   const db = client.db("eventdb");
   const eventsCollection = db.collection("eventdb");
 
-  app.get("/api/event", async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { category, place, startTime, endTime, search } = req.query;
-      const query: any = {};
-
-      if (category) query.category = category;
-      if (place) query.place = place;
-      if (startTime || endTime) {
-        query.date = {};
-        if (startTime) query.date.$gte = new Date(startTime as string);
-        if (endTime) query.date.$lte = new Date(endTime as string);
-      }
-      if (search) query.title = { $regex: search, $options: "i" };
-
-      const eventsCollection = client.db("eventdb").collection("eventdb");
-      const usersCollection = client.db("eventdb").collection("users");
-
-      const events = await eventsCollection.find(query).toArray();
-
-      const eventsWithAttendeesCount = await Promise.all(
-        events.map(async (event) => {
-          const attendeeCount = await usersCollection.countDocuments({
-            joinedEvents: event._id.toString(),
-          });
-          return {
-            ...event,
-            attendeesCount: attendeeCount,
-          };
-        }),
-      );
-
-      res.status(200).json(eventsWithAttendeesCount);
-    } catch (error) {
-      console.error("Error fetching events:", error);
-      res.status(500).json({ message: "Internal server error" });
-    }
-  });
+    app.get("/api/event", async (req: Request, res: Response) => {
+        try {
+            const events = await eventsCollection.find().toArray();
+            res.status(200).json(events);
+        } catch (error) {
+            console.error("Error fetching events:", error);
+            res.status(500).json({ message: "Internal server error" });
+        }
+    });
 
   app.get(
     "/api/events/:eventId/users",
