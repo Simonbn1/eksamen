@@ -18,6 +18,7 @@
     "test:client": "cd client && npm test"
   },
   "dependencies": {
-    "@react-oauth/google": "^0.12.1"
+    "@react-oauth/google": "^0.12.1",
+    "react-loader-spinner": "^6.1.6"
   }
 }
