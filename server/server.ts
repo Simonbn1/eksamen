@@ -883,15 +883,15 @@ client.connect().then(() => {
     }
   });
 
-    app.use((req, res, next) => {
-        if (req.method === "GET" && !req.path.startsWith("/api")) {
-            res.sendFile(path.resolve("../client/dist/index.html"));
-        } else {
-            next();
-        }
-    })
+  app.use((req, res, next) => {
+    if (req.method === "GET" && !req.path.startsWith("/api")) {
+      res.sendFile(path.resolve("../client/dist/index.html"));
+    } else {
+      next();
+    }
+  });
 
-    app.get("*", (req, res) => {
+  app.get("*", (req, res) => {
     res.sendFile(path.join(staticPath, "index.html"));
   });
 
