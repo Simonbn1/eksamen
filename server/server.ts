@@ -3,7 +3,6 @@ import { MongoClient, ObjectId } from "mongodb";
 import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import bcrypt from "bcrypt";
 
 dotenv.config();
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
@@ -217,34 +216,6 @@ client
       }
     });
 
-    app.post("/api/login-admin", async (req, res) => {
-      const { username, password } = req.body;
-
-      try {
-        const usersCollection = client.db("eventdb").collection("users");
-        const user = await usersCollection.findOne({ username });
-        if (!user) {
-          console.log("User not found:", username);
-          return res
-            .status(401)
-            .json({ message: "Invalid username or password" });
-        }
-
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) {
-          console.log("Invalid password for user:", username);
-          return res
-            .status(401)
-            .json({ message: "Invalid username or password" });
-        }
-
-        // Set a cookie or generate a token for the session
-        res.status(200).json({ message: "Login successful" });
-      } catch (error) {
-        console.error("Error during login:", error);
-        res.status(500).json({ message: "Internal server error" });
-      }
-    });
 
     app.get("/api/user/joined-events", async (req, res) => {
       const userId = req.query.userId;
