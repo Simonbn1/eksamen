@@ -1,8 +1,9 @@
 {
   "scripts": {
-    "build": "vite build",
+    "build": "tsc",
     "dev": "vite",
-    "start": "node server.ts"
+    "start": "node server.ts",
+    "heroku-postbuild": "npm install --prefix client && npm run build --prefix client"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.6.3",

@@ -2,7 +2,8 @@
   "scripts": {
     "dev": "ts-node-dev server.ts",
     "start": "node server.ts",
-    "build": "tsc -p ."
+    "build": "tsc",
+    "heroku-postbuild": "npm install --prefix client && npm run build --prefix client"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
