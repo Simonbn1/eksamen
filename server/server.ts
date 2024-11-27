@@ -890,13 +890,13 @@ client.connect().then(() => {
     }
   });
 
-    app.use(express.static(path.join(__dirname, "../client/dist")));
+  app.use(express.static(path.join(__dirname, "../client/dist")));
 
-    app.listen(port, () => {
-        console.log(`Server is running on http://localhost:${port}`);
-    });
+  app.listen(port, () => {
+    console.log(`Server is running on http://localhost:${port}`);
+  });
 
-    app.get("*", (req, res) => {
-        res.sendFile(path.join(__dirname, "../client/dist/index.html"));
-    });
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "../client/dist/index.html"));
+  });
 });
